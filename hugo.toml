@@ -1,4 +1,4 @@
-baseURL = 'https://jsycdut.github.io'
+baseURL = 'https://github.io'
 locale = 'en-us'
-title = '所有的伟大，否来自于一个勇敢的开始'
+title = '所有的伟大，都来自于一个勇敢的开始'
 theme = 'paper-mode'
