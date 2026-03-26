@@ -175,4 +175,5 @@ buildNumber.properties
 
 public/
 resources/
-.hugo_build_lock
+.hugo_build.lock
+.#all-blogs.org
