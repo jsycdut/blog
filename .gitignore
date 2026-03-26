@@ -172,3 +172,7 @@ buildNumber.properties
 .mvn/wrapper/maven-wrapper.jar
 
 # End of https://www.toptal.com/developers/gitignore/api/eclipse,intellij+all,mavenn
+
+public/
+resources/
+.hugo_build_lock

@@ -1,0 +1,13 @@
+#+hugo_base_dir: .
+#+title: 博客内容
+* jsycdut静态博客
+** TODO emacs + org + hugo + github = github pages
+:PROPERTIES:
+:EXPORT_FILE_NAME: 使用org组织静态博客站点
+:END:
+使用org编写博客内容，然后将内容发布到github pages上面
+** TODO 文章2
+:PROPERTIES:
+:EXPORT_FILE_NAME: 文章2
+:END:
+zhelix i写的是文章2
