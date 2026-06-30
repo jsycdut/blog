@@ -1,13 +1,1635 @@
 #+hugo_base_dir: .
-#+title: 博客内容
-* jsycdut静态博客
-** TODO emacs + org + hugo + github = github pages
+
+* 发布于Github Pages上的静态博客
+** TODO 重学Emacs-2026
 :PROPERTIES:
-:EXPORT_FILE_NAME: 使用org组织静态博客站点
+:EXPORT_FILE_NAME: 重学emacs-2026
+:SLUG: learn-emacs-in-2026
+:RELEASE_DATE: 20260113
 :END:
-使用org编写博客内容，然后将内容发布到github pages上面
-** TODO 文章2
+
+第一次接触编辑器，应该是在2014年，那个时候刚上大学，计算机课程作业用的Code::Blocks来写C++代码，这个东西应该准确的是叫做IDE，而不是单纯的一个编辑器，在2014~2018这段时间，渐渐的接触了sublime（没咋用），notepad++（没咋用），eclipse（用的多），JetBrains IDEA（一般般），然后是vim（包括后续的neovim），然后一直都是vim用户（我工作中开发用的IDEA用的vim按键映射，chrome浏览器中使用的vimium插件模拟vim），然后还学习过《vim实用技巧》，尝试过把vim打造成自己的小型IDE，也形成了自己的配置[[https://github.com/jsycdut/jalc/tree/master/.config/nvim][VIM配置]]，对vim可以说是基本了解该怎么操作的，后期大概在21年1月接触emacs，也形成了一套自己的配置[[https://github.com/jsycdut/emacs.d][.emacs.d]]，后续在工作中，依然是基于IDEA + VIM映射的，偶尔使用一下emacs，也尝试过emacs的发行版spacemacs，时间一晃已经来到2026年，距离第一次进入计算机编程的世界，已经过去了快12年了（毫无疑问，我现在仍然觉得自己是一无所知），在最近，我跟着[[https://space.bilibili.com/292659700/lists/125869?type=season][子龙山人-21天学会Emacs-2022年版]]，重新配置我的Emacs，子龙山人也是[[https://emacs-china.org/][Emacs China]]的站长，视频虽然是2022年的，但是跟着学下来，给我扫了不少的盲，也重拾了对Emacs的兴趣和信心，后续打算将Emacs作为我的非工作主力编辑器，用于写博客、编程、日程管理等（均指非工作场景，工作单位要求用什么，我无法控制），这篇博客也是使用Emacs编写的(org + ox-hugo + hugo + github pages展现的)。
+
+
+我觉得Emacs的好处
+1. 适配多场景。编程、日常事务管理、写博客。
+2. 高度的可自定义。完全适配我的需求，我有什么需要，我自己写，不用去寻找其他的工具来替代。
+3. 高投资回报比。学习Emacs，配置Emacs是困难的，但是我相信，配置好之后，只会越用越顺手。等我从这个世界消失之后，Emacs依然会存在，使用和维护Emacs的这个群体不会消失，它会具有长期的生命力。
+   
+*** Emacs基础学习
+#+begin_src  elisp
+键位介绍
+C是键盘上的Control键。C-f = Control + f
+M是键盘上的Alt(windows)或者Option(Mac)键，没有Alt可以用Esc代替。M-x = Alt + x
+
+常见移动
+向上一行：C-p (p = previous)
+向下一行：C-n (n = next)
+向左一个字符：C-b (b = backward)
+向右一个字符：C-f  (f = forward)
+向右一个单词：M-f
+向左一个单词：M-b
+行首：C-a (ahead)
+行尾：C-e (end)
+句首：M-a
+句尾：M-e
+文档首：M-<
+文档尾：M->
+下一屏内容：C-v  (View next screen)  /* 不是从当前光标位置翻一屏，而是从页面末尾的位置翻一屏，下同 */
+上一屏内容：M-v (没有太好的翻译)
+调整当前行的屏幕位置：C-l /* 当前行会在屏幕中居中，顶部，底部三个位置切换 */
+
+特殊
+关闭emacs：C-x C-c
+打断输入的命令：C-g
+关闭当前buffer: C-x k
+重复命令：C-u 数字 命令 /* C-u 3 C-n 向下移动3行 */
+解释按键功能：C-h k
+解释函数功能：C-h f
+解释变量信息：C-h v
+查看可用按键绑定(binding)：C-h b
+查看常见的操作命令(包括文件、buffer、window、mark&&kill、Projects)：C-h C-q
+不知道要啥，但是想看帮助：C-h ?
+进入emacs tutorial体验内容：C-h t
+
+文本对象操作
+选中：C-<spc> 然后移动光标，就可以选中
+剪切：C-w
+复制：M-w
+粘贴：C-y
+撤销：C-x-u 或者 C-/
+删前一个字符：<del>
+删光标字符：C-d
+删前一个单词：M-<del>
+删后一个单词：M-d
+删到行末尾：C-k
+删到句子末尾：M-k
+
+正向搜索：C-s
+反向搜索：C-r
+
+杀掉其他窗口：C-x-1
+水平分窗：C-x-2
+竖直分窗：C-x-3
+切换窗口：C-x-o
+关闭本窗口：C-x-0
+关闭其他窗口：C-x-1
+打开新文件到一个新窗口：C-x 4 C-f
+
+新建一个Frame：C-x 5 2
+关闭一个Frame：C-x 5 0
+
+切换buffer：C-x b
+
+查看emacs可以提供哪些帮助：C-h-?
+查看命令的帮助信息：C-h x
+列出包含指定字段的命令：C-h a
+查看手册：C-h-i
+
+列出所有的包：M-x list-packages
+#+end_src
+
+
+
+我日常使用的IDE的功能有哪些？如何将emacs打造为一个现代编程IDE？
+*高亮。数据类型，函数，关键字等(treesitter)*
+*查看符号列表。函数定义，全局变量(treesitter)*
+*跳转。函数定义，变量定义（treesitter）*
+*查找调用点。函数，变量(treesitter)*
+*代码自动补全。输入候选项，调用函数时提供占位符（snippet）*
+*代码运行（quickrun）*
+*代码调试(lldb? dap?)*
+*语言服务器后端（LSP，elgot）*
+
+=学习emacs的要点=
+/1. 知道你想要的效果对应着emacs的什么功能/
+/2. 会调用功能对应的命令/
+/3. 会给对应的命令写适合你用的快捷键/
+
+emacs需要知道的两个关键概念，mode和mode map
+
+emacs的UI概念
+Frame：独立的，可与用户交互的emacs UI整体。
+tab：位于同一个Frame中，并行存在的多个独立交互页面，但是每次只能选中其中一个页面进行操作
+window：位于一个Frame或者其下的tab中的，一个或者多个可以被独立操作的区域的集合
+buffer：用户编辑内容，展示内容的区域
+
+
+emacs的mode概念
+emacs中的mode是针对每一个独立的buffer的，包含了 *major mode* 和 *minor mode* 两种模式，以及展示当前模式信息的 *模式行* 信息。
+
+任何一个编辑器，最基础的功能肯定是：我们在其中输入字符集合的动作就像用钢笔在纸质笔记本上写字一样，但是，这个要求太低了，我们肯定希望编辑器为我们带来更多的东西。比如
+如果我输入的一段折叠过的json文本，那么我希望emacs给我把它美化成我眼睛喜欢的格式
+如果我输入的是一段java，cpp，python，JavaScript代码，我希望它给我高亮其中的关键字，函数定义等
+在emacs中，上面提到的功能，可以通过设置对应的 *major mode* 来实现，这些 *major mode* ，或者 *minor mode* ，本质上都是一些功能的集合，如果我们需要某些功能，需要找到对应的mode，将其打开，然后就可以通过调用命令的方式来执行对应的功能。 *major mode* 是一个buffer的主要模式，只能有一个，提供与这个buffer内容所属类型的最核心的功能， *minor mode* 是一个buffer的辅助模式，提供着辅助功能，可以有多个。
+
+如果要查看一个buffer有哪些mode，可以通过 ~C-h m~ 来查看，它会提供给你这个buffer中开启了的所有mode的信息，并且告诉你你有哪些快捷键以及对应的命令可用，是非常实用的一个功能。
+
+emacs中的 *mode map*
+
+在我知道我要做什么的时候，快捷键用于加速我的行为得到结果。 emacs中的key bindingds就是快捷键， ~C-h-b~ 可以查看当前buffer所有的快捷键（按照优先级排序），一个buffer有不同的mode， *mode map* 就是在对应mode下面的快捷键， 名字一般是 ~模式名-mode-map~ 。快捷键是有优先级的，顺序是
+
+1. minor mode。在开启的minor mode中一个个查，顺序就是你 ~C-h-b~ 的里面出现的那个顺序
+2. major mode。主模式下面定义的快捷键
+3. global map。兜底，一般设置的全局可用的
+
+#+begin_src elisp
+
+  ;; 给特定mode绑定快捷键，使用define-key函数
+  (define-key python-mode-map (kbd "<f5>") '我要执行的函数)
+
+  ;; 给特定mode绑定快捷键，使用use-package定义mode快捷键
+  (use-package python
+    :bind (:map python-mode-map
+		("<f5>" . 我要执行的函数)))
+
+  ;; 全局绑定
+  (global-set-key (kbd "C-c l") '我要执行的函数)
+#+end_src
+
+Gemini: _mode决定了当前的上下文（它是谁），Keymap决定了在上下文的动作（它能做什么），Mode Map就是两者的粘合剂_
+
+
+*性能以及问题排查*
+emacs启动如果失败，那么可以使用 ~emacs --debug-init~ 来启动emacs，把详细的错误信息给展示出来。如果你没开，展示的错误信息里面，也会提示你使用这个命令来启动emacs。
+
+展示emacs启动时间： ~M-x: emacs-init-time~
+统计启动时间情况：插件 ~benchmark-init~ 。命令 ~benchmark-init/~ 下面相关的命令，以树或者排序列表形式来展示启动情况。
+
+*我想知道一个package有哪些命令可以用*
+可以使用M-x apropos-command，然后输入包名前缀，进行查询，或者直接 M-x apropos命令，这里可以查这个包的所有的函数，变量和命令
+
+*** Emacs打造旅程
+我的目标是使用emacs作为我的笔记、日程、多功能IDE为一体的综合工具，
+作为笔记系统，要能够记录我的笔记信息，博客信息。
+1. 在我任意时刻，快速呼出一个记录我的闪现点子的buffer，记录下来
+2. 能够搜索我的笔记系统，查找到相关的内容
+3. 将我的内容导出到网页中，让我在网页中查看
+作为日程工具，要能够记录我的工作，日常生活安排。
+1. 安排未来。安排我未来的工作内容，并且给我提醒，在什么时候该做什么事情
+2. 记录过程。执行过程中，记录我的耗时
+3. 回顾历史。在我一定时间之后，回顾这段时间的工作内容，具体做了哪些东西，花费了多长时间
+作为多功能IDE，要能够满足我的java、python、go、js/ts开发需求，替代掉我的JetBrains系列开发IDE。
+1. 项目管理。同时工作在各个语言的项目中，可以切换，按照文件名，文件内容模糊查找项目中的内容
+2. 代码管理。
+   2.1. 代码高亮。关键字、函数、变量高亮。
+   2.2. 代码大纲。能够查看我当前代码buffer中的代码结构，包括变量、函数、类、结构体等，类似于jetbrains中的structure，eclipse中的outline。
+   2.3. 代码跳转。从代码大纲中选中我的目标，跳转到代码buffer中对应的地方，以及我选中一个定义，跳转到它的声明/定义的地方
+3. 项目代码调试。
+   3.1. 类似于jetbrains和eclipse的调试功能。
+
+项目管理，使用projectile，虽然emacs内置的project.el也能工作，但是目前暂时还追不上projectile。
+代码高亮，使用tree-sitter + LSP的组合，
+代码大纲，最原始的办法是imenu，这是emacs自己的机制，可以弹出一个minibuffer，把索引给拿到手
+然后是基于consult的更加智能的consult-imenu，他的数据来自imenu，imenu的数据来自tree-sitter，不要使用eglot的索引，不好用。在插件方面，可以使用symbols-outline插件，这个数据来自eglot，也可以使用
+代码大纲有局部文件的，也有整个工作空间的，依赖插件consult-eglot-symbols。
+
+参考资料
+[[https://www.youtube.com/watch?v=Yah69AfYP34&t=680s][5分钟把emacs变成java ide]]，这个里面用的是lsp-mode，可以用作参考，现在我用的是eglot，视频中其他的插件可以借鉴配置。
+
+
+*** Emacs如何全局替换
+依赖consult-ripgrrep + embark
+1. consult-ripgrep进行搜索
+2. 在搜索结果中，调用embark-act，进入embark-export
+3. 在embark-export跳出的缓冲区中，命令：wgerp-change-to-wgrep-mode，这样才能写这个buffer，在开始之前，会告诉你保存和放弃更改的快捷键，记住即可
+4. 命令：query-replace，然后依次输入要替换的源对象RET，目标对象RET，然后系统会逐个询问你是否替换，你y/n进行选择，搞完之后用3的保存和放弃结束动作
+
+*** 碰到过的emacs的问题记录
+**** eglot模式下变量的高亮
+在写业务代码的时候，比如一个方法传入了a,b,c三个复合类型参数，我很需要知道这三个复合类型参数在哪里被用到，并且这三个复合类型参数被提取了哪些参数，这对我理解参数的作用很重要，这源于我之前在工作中需要对一个有7年历史的代码库进行重构，这里很普遍的场景是一个方法可能前后有3任作者，大家都只是完成任务而已，并没有从全局出发关注代码质量，随意的使用变量，这使得我但凡漏掉一个用例，都会导致我的重构失败，我为了不漏掉参数的使用场景，会很明显的在IDE中高亮选中的参数。
+
+在emacs中，外置一个对应语言的lsp服务器，加上emacs内置的eglot作为lsp客户端，已经是一个ide的标准配置了，对于某个变量，其实lsp服务器已经可以做到高亮了，在emacs中，这个高亮的配置是和face相关的，称作eglot-highlight-symbol-face，可以通过命令 ~describe-face~ 然后选中这个face，进行手动的设置，或者通过 ~set-face-attribute~ 来进行配置。
+**** emacs中的face是什么
+**** evil-mode的visual-line-mode如何移动视觉上的一行
+#+BEGIN_SRC elisp
+  (setq evil-respect-visual-line-mode t)
+#+END_SRC
+**** evil的gd是go to definition，还有其他g命令吗
+gr，go to refrence，可以查看这个变量或者函数的引用。
+go to definiton依赖的是xref，调用的是xref-backend-functions，它在不同的场景下的取值不同，是所谓的透明后端，比如在这个org buffer中，它的值是etags--xref-backend，但是在一个开启了eglot的buffer中，它的值是eglot-xref-backend
+**** xref是什么东西？
+emacs中的关于符号跳转的统一调度器。它提供了
+1) xref-find-definitions。查找符号定义
+2) xref-find-refrences。查找符号引用，这里弹出的buffer中的条目是可以使用C-n/p预览的
+3) xref-find-apropos。模糊搜索项目里的函数或者变量名
+4) xref-go-back。回退到上一个访问地点
+   
+** TODO 做事的心态
 :PROPERTIES:
-:EXPORT_FILE_NAME: 文章2
+:EXPORT_FILE_NAME: 做事的心态
 :END:
-zhelix i写的是文章2
+#+BEGIN_QUOTE
+
+做事，看的是结果，不是过程。无论是工作，还是家庭生活，都是这样。
+结果不行，中间过程无论你付出的再多的努力，受了多大委屈，都不重要，非要以苦劳论自己的付出，只会换来别人的不理解和自己的难堪。
+#+END_QUOTE
+
+今天早上8点闹钟叫醒我，8:20左右开车出门买菜，9:20左右到家，开始做饭，最终12:20左右将两个菜端上桌，结局是老婆黑着脸，我心里也不很是滋味。
+
+在这个事件中，结局是老婆不开心，相关原因如下
+=直接原因= 把番茄牛腩炖到耙的时间花费过久，客户等待时间过长，成菜不够耙软而且块头太大难以食用
+=根本原因= 牛肉切块太大，导致砂锅将其炖软花费时间过长
+=间接原因= 最后采用了将番茄牛腩从砂锅转移到炒锅中进行大火收汁，阻碍了炒锅土豆炒腊肉的进程，拖长了整体上菜时间。番茄牛腩不好吃，客户生气，上菜慢，客户生气。
+
+这个事件中，面对老婆的黑脸，我一开始也很生气，她只看到了结果，没看到我早上八点半出去买菜，回来厨房一通忙活，中间还抽空晾衣服，手洗衣服等过程，导致我也脸黑。可是后面转头一想，我感觉自己是一个巨婴，不是一个成年人，我想用自己的过程去对抗最终的结果，这是不合理的。我们两口子都是基于自己定位出发做出的情绪结果，最后呈现这样的结局，这是很正常的事情。这是自身定位出发的直接结果。生活上，也许我们还能最终会互相体谅对方在过程中的表现，但是在社会中，我们是只看结果的，结果做不好，我就没有活路，这将是以后我的核心指导思想， ~唯结果论~
+** TODO 学习Elisp
+:PROPERTIES:
+:EXPORT_FILE_NAME: 学习elisp
+:SLUG: learn-elisp
+:RELEASE_DATE: 20260201
+:END:
+
+参考资料
+- 跟着[[https://learnxinyminutes.com/zh-cn/elisp/][15分钟学会Emacs Lisp]]学习，以及代码实操
+
+#+begin_src ELISP
+
+;; 这是注释
+
+;;定义变量
+(defvar name "金世钰")
+(defvar staff-no "80379471")
+
+;; 定义函数
+(defun hello-world(name)
+  "自定义的hello-world elisp函数"
+  (message (format "hello%s\n" name)))
+
+;; 调用函数
+(hello-world name)
+
+;; + 是一个函数，如果你不知道这个函数是干嘛的，C-h-f 输入这个函数，查看它的信息
+(+ 1 2 3 4)
+
+;; 在光标出插入内容
+(insert "jsy")
+
+;; 创建一个名为"see you"的buffer并且光标切换到那个buffer区
+(switch-to-buffer-other-window "see you")
+
+;; progn可以结合一堆S表达式，然后让他们顺序执行
+(progn (switch-to-buffer-other-window "see you")
+(insert "emacs lisp"))
+
+;; erase-buffer 清理数据
+;; progn 串联S表达式
+(progn (switch-to-buffer-other-window "see you")
+ ;; 清理数据
+ (erase-buffer)
+;; 插入新内容
+ (insert "emacs lisp is great")
+;; 切换window回去
+ (other-window 1))
+
+;;let串联S表达式，记住let后面跟的是两个括号
+(let ((local-name "金世钰"))
+  (switch-to-buffer-other-window local-name)
+  (insert local-name))
+
+;; format格式化字符串
+(setq global-name "elisp is awesom!")
+(format "hello world from %s\n" global-name)
+
+;; 在函数中使用let
+(defun alert(event message)
+  ;; let后面跟两重括号的原因是里面可以定义多个变量
+  (let ((local-event event)
+        (local-message message))
+   (switch-to-buffer-other-window event)
+   (insert message)
+   (message (format "event: %s\n message:%s\n" local-event message))))
+(alert "系统崩溃" "系统崩溃，即将重启")
+
+;; 读取用户输入
+(read-from-minibuffer "这是提示词: ")
+
+;; 读取用户输入，赋值个变量
+(setq name (read-from-minibuffer "请输入你的名字："))
+
+(setq list-of-company '("蜀天梦图" "蚂蚁集团" "招商银行"))
+;; car取列表第一个元素
+(car list-of-company)
+;; cdr取列表剩余元素
+(cdr list-of-company)
+;; push往列表中添加元素，修改了列表
+(push "成都理工大学" list-of-company)
+(car list-of-company)
+
+;; mapcar对列表中的每一个元素都执行操作
+(mapcar 'hello-world list-of-company)
+
+;; buffer光标最小位置
+(point-min)
+
+;; buffer光标最大位置
+(point-max)
+
+;; 跳转光标到最大位置
+(goto-char (point-max))
+
+;; 一个替换函数 hello - Bounjour
+(defun replace-hello()
+   (progn
+   (switch-to-buffer-other-window "see you")
+   (goto-char (point-min))
+   (while (search-forward "hello" nil t)
+    (replace-match "Bonjour"))
+    (other-window 1)))
+
+(replace-hello)
+
+
+;; 给Boujour后面的对象字体改为粗体
+(defun boldify-names()
+ (switch-to-buffer-other-window "see you")
+ (goto-char (point-min))
+ (while (re-search-forward "Bonjour \\(.+\\)!" nil t)
+  (add-text-properties (match-beginning 1)
+                       (match-end 1)
+                       (list 'face 'bold))))
+
+(boldify-names)
+
+;; 阅读Emacs Lisp官方文档:
+;;
+;; C-h i m elisp 回车
+#+end_src
+
+
+- [[https://smacs.github.io/elisp/][emacs lisp简明教程]] 及其代码实操
+
+#+begin_src elisp
+      ;; let* 结构里面，后面声明的变量可以使用前面声明的变量，单独的let是不行的
+      (defun circle-area(radis)
+	(let* ((pi 3.141592653)
+	       (area (* pi radis radis)))
+	  (message "radis %s area is %s" radis area)))
+      (circle-area 2)
+
+     ;; lambda表达式就是 (lambda (argument-list) (body))
+     ;; 单纯调用lambda就是 (funcall lambda函数或者对应的变量 lambda函数所需的参数)
+     (funcall (lambda (arg1 arg2)
+	(message (format "%s-%s" arg1 arg2))) "zhangsan" "lisi")
+     ;; 把labmda复制给一个变量
+     (setq my-lambda-func (lambda (position)
+			    (message position)))
+     ;; 调用lambda函数
+     (funcall my-lambda-func "jsycdut")
+
+     ;; if做判断，cond判断多个条件(condition，类似于其他语言里面的switch)
+     ;; (if condition
+     ;;   then
+     ;;   else)
+    (defun greater(a b)
+  ;;    (if (= a b)
+  ;;	(message (format "%s > %s" a b))
+  ;;	(message (format "%s < %s" a b))))
+    (greater 13 4)
+    (greater 3 4)
+
+    ;; setq可以支持多个变量
+    (setq a 3
+	  b 4)
+    (message (format "%s" a))
+    (message (format "%s" b))
+
+    ;; 在org-mode中，使用rainbow-delimiters，无法识别作为大于小于符号的><，会存在把代码认为错误的情况
+    (defun factorial(n)
+      (let ((res 1))
+	(while (> n 1)
+	  (setq res (* res n)
+		n (- n 1)))
+	  res))
+
+    (factorial 3)
+
+    (or  b c (setq b 3))
+
+    ;; 展示if 里面使用and条件
+    (defun is-ascii(b)
+      (if (and (> b 0)
+	       (< b 128))
+	  (message (format "%s is ascii" b))
+	  (message (format "%s is not ascii" b))))
+
+    (is-ascii 12)
+    (is-ascii 333)
+
+    ;; 展示condition（case）的使用
+    (defun is-workday(day)
+      (cond ((= day 1) (message (format "1 is monday")))
+	    ((= day 2) (message (format "2 is tuesday")))
+	    ;; 默认
+	    (t (message "no"))))
+    (is-workday 23)
+
+    ;; 函数列表
+    (defun NAME ARGLIST [DOCSTRING] BODY...)
+  (defvar SYMBOL &optional INITVALUE DOCSTRING)
+  (setq SYM VAL SYM VAL ...)
+  (let VARLIST BODY...)
+  (let* VARLIST BODY...)
+  (lambda ARGS [DOCSTRING] [INTERACTIVE] BODY)
+  (progn BODY ...)
+  (if COND THEN ELSE...)
+  (cond CLAUSES...)
+  (when COND BODY ...)
+  (unless COND BODY ...)
+  (when COND BODY ...)
+  (or CONDITIONS ...)
+  (and CONDITIONS ...)
+  (not OBJECT)
+
+  (when (> 1 0)
+    (message "1 > 1")
+    (message "2 > 1"))
+
+  ;; unless 里面需要时false才能执行
+  (unless (> 1 20)
+    (message "1 > 0"))
+#+end_src
+
+#+BEGIN_SRC elisp
+   (setq md (floor 1e20))
+
+
+   ;; 字符串操作
+   ;; 子串
+   (substring "abd" 1)
+
+   ;; 空串判定
+  (defun string-emptyp(str)
+    ;; string<判定字符串的大小，""空字符串最小
+    (not (string< ""  str)))
+  (string-emptyp "")
+  (message (format "string=或者string-equal判定字符串是否相等%s %s" (string= "a" "a") (string-equal "a" "'b")))
+  (message (format "string<或者string-lessp判定字符串是否更小%s %s" (string< "a" "b") (string-lessp "a" "a")))
+
+  (defun explain(info exp)
+    (message (format info exp)))
+
+  (explain "make-string可以构造字符串%s" (make-string 5 ?h))
+  (explain "string也可以构造字符串%s" (string ?a ?b ?c))
+  (explain "char-to-string可以把字符构造成字符串 %s" (char-to-string ?a))
+  (explain "string-to-char可以把字符串摘取第一个字符 %s" (string-to-char "hello"))
+  (explain "string-to-number把字符串转为数字 %s" (string-to-number "13dmkk"))
+  (explain "number-to-string把数字转为字符串 %s" (number-to-string 223))
+  (explain "concat连接字符串 %s" (concat '(?a ?b ?c)))
+  (explain "downcase转小写 %s" (downcase "NIUBI"))
+  (explain "upcase转大写 %s" (upcase "niubi"))
+  (explain "string-match查找字符串 %s" (string-match "ab" "hello habbit"))
+  (progn (string-match "3\\(45\\)" "01234567890123456789")
+	 (match-data))
+  (let ((start 0))
+    (while (string-match "34" "01234567890123456789" start)
+      (princ (format "find at %d\n" (match-beginning 0)))
+      (setq start  (match-end 0))))
+
+  (let ((str "01234567890123456789"))
+    ;; 这里先match，然后替换的时候就是match的位置
+    (string-match "34" str)
+    (princ (replace-match "x" nil nil str 0))
+    (princ "\n")
+    (princ str))  
+#+END_SRC
+
+#+begin_src elisp
+;; 列表
+#+end_src
+
+*** 插件功能
+[[https://github.com/minad/vertico][vertico]] 在emacs所有情况下都能正常使用的补全功能
+[[https://github.com/minad/marginalia][maginalia]] 给你的minibuffer展示的内容添加文档，让你能够知道当前条目是干啥的，类似于注解
+[[https://github.com/justbur/emacs-which-key][which-key]] 已经由一个独立插件，被归化到emacs 30中，它让你在使用快捷键的时候，给你提供下一步的可选按键弹出菜单
+[[https://github.com/minad/consult][consult]] 即时的搜索和导航插件，提供了consult-ripgrep使得你的可以在搜索的时候，同时可以看到当前候选项对应的buffer内容，非常实用
+[[https://github.com/oantolin/embark][embark]] 在minibuffer可普通buffer中提示你下一步可以执行哪些动作
+
+** TODO Go工程基础
+:PROPERTIES:
+:EXPORT_FILE_NAME: go工程基础
+:SLUG: go-project-basic
+:RELEASE_DATE: 20260213
+:END:
+GO的环境变量有哪些？都起什么作用
+=go env= 可以查看所有的GO相关的环境变量。
+GOROOT是GO的安装目录
+GOPATH是下载的依赖模块的存放目录，可以供所有go项目共用。
+GOBIN是下载的go二进制执行文件的存放目录，比如go的语言服务器gopls
+GO111MODULE: 开启/关闭模块支持。Go 1.16+ 默认为 on。
+GOPROXY: 设置模块代理，国内建议设为 https://goproxy.cn,direct 以加速依赖下载。
+
+Go的项目结构是怎么样的？
+go.mod
+go.sum
+main.go
+一个main package
+
+Go是怎么编译项目的？
+go build .
+
+Go是怎么处理依赖的？
+go get xxx，然后自动给你计算所需依赖，写到go.mod
+** TODO Magit学习之旅
+:PROPERTIES:
+:SLUG: learn-magit
+:EXPORT_FILE_NAME: magit学习之旅
+:RELEASE_DATE: 20260213
+:END:
+
+#+begin_src elisp
+  ;; magit-status 弹出展示类似于git satus的buffer，可以用g刷新当前buffer或者G刷新所有magit buffer，tab展开目录下的内容（hide/show），RET可以查看具体内容(visit)，C-p/n上下移动行，M-n/p上下移动section，如要要查看有哪些能用的候选命令，在buffer中使用？来展示候选菜单信息。在diff中s做add，u做撤销，大写的S和U则是对文件中所有的变更做s和u
+  
+
+#+end_src
+** TODO Linux与Unix的关系解析
+:PROPERTIES:
+:EXPORT_FILE_NAME: linux与unix的关系解析
+:SLUG: linux-unix
+:RELEASE_DATE: 20260218
+:END:
+
+*** 参考文档
+1. [[https://www.hnou.edu.cn/sites/html/jszx/2025_12/31_08/content-29278.html][一文看懂Linux和macOS与UNIX的关系]]
+2. [[Linux 与类 UNIX][Linux 与类 UNIX]]
+
+
+*** 我的理解
+基于时间线，我整理如下：
+| 概念   | 相关时间 | 相关人物/机构                           | 我的理解                                                       |
+| UNIX   |    1969 | Dennis Ritchie/Ken Thompson/Bell Labs | 现代操作系统的基石，初代计算机黑客的天才作品                          |
+| 类UNIX |    197x | 各种unix衍生出来的系统                   | UNIX很优秀，有商业价值和学术价值，商界和学术界都基于UNIX搞出来自己的版本 |
+| BSD    |    197x | Berkeley Software Distribution        | 类UNIX中的学术派版本，属于加利福尼亚大学伯克利分校                    |
+| POSIX  |    1988 | IEEE                                  | 类UNIX版本太多了，难以在各种物理机上面都正常运行，所以IEEE搞了一个标准   |
+| Linux  |    1991 | Linus Torvalds                        | 基于UNIX的一个实现，借鉴其思想，但是自行实现其功能，一般指的是系统内核    |
+| OS X   |         |                                       |                                                               |
+
+UNIX是商业机构的作品，虽然他来自于两位天才黑客，但UNIX是两位大佬是在给贝尔实验室打工的时候写出来的，所以UNIX属于贝尔实验室这个商业机构，一开始管控没有那么严格，UNIX在外部世界（商业+学术）开花，出现了各种基于UNIX系统（类UNIX系统），后面各种UNIX五花八门，IEEE作为标准化机构，就搞出来一个POSIX标准，让大家的UNIX实现都有规范可以遵循，但是标准终归是标准，又没有强制所有系统必须按照这个标准实现，各种类UNIX系统也仅仅是将POSIX作为参考。
+
+能称之为UNIX系统的，都是商业上的系统，比如\\
+OS X，属于Apple公司，一般装备在MacBook系列笔记本电脑上，通过了UNIX 03认证\\
+AIX，属于IBM公司，基于UNIX System V标准的商业版操作系统。它专门运行在IBM专有的Power系列芯片服务器（如Power Systems、RS/6000）上，以高度的安全性、可靠性、强大的扩展性以及对关键任务（如银行、大型企业数据库）的支持而闻名\\
+Solaris，属于Sun Microsysems的商业操作系统\\
+HP-UX，属于HP（惠普）的UNIX System V标准的商业版操作系统
+
+其他的，都可以称之为类UNIX系统，而类UNIX系统中的两大佼佼者，分别是BSD和Linux。BSD来自学术界，目前划分出了Free BSD（最流行，注重稳定性和性能），Open BSD（注重安全）和NetBSD（注重可移植性）三个方向，Linux则是现在服务端系统的王者，它起源于Fuck Nvidia的顶尖黑客Linus Torvalds，现在掌控着大部分的服务端系统市场，是名副其实的类Unix系统之王，当然Linux一般我们指的是内核部分，是最硬核的部分，然而我们平常接触到的一般是称为Linux发行版的操作系统，比如Ubuntu，Cent OS，Arch Linux，Kylin等，它是Linux内核 + 一系列用户交互软件的组合，这些用户软件包括Bash、GCC、包管理器、桌面管理系统等。
+** TODO use-package的基础用途
+:PROPERTIES:
+:EXPORT_FILE_NAME: use-package的基础用途
+:END:
+
+#+begin_src 
+:init ==> 加载包 ==> :config
+#+end_src
+** TODO 2026年才使用AI编程工具的我，还有救吗？
+:PROPERTIES:
+:EXPORT_FILE_NAME: 大模型编程工具
+:END:
+*** 概念集合
+
+AI编程工具智能体，大模型，用量，付费，效果
+Claude Code，Cursor，CodeX，Trae，这些称作ai辅助编程工具，它们依赖自己背后的大模型才能工作
+Claude Code => 可以使用自家公司Anthropic的Opus，Sonnet，Haiku模型
+Cursor => 可以使用自家公司AnySphere的Compose，以及可以接入Claude Code的模型
+CodeX => 可以使用自家公司Open AI的GPT-5.3-CodeX
+Trae => 可以使用自家公司Byte Dance的Doubao模型，也可以使用国内其他的GLM, Kimi, QianWen, MiniMax
+我使用过国内的trae，但是国外的我选哪个来进行适用呢？
+CodeX是先驱，Cursor统治了2024~2025年，Claude Code在2025年末异军突起。我看了三家的官网，以及文档，最终从文档完备性的角度，我选择Cluade Code（或者称之为CC），以下，是我基于CC的试用旅程。
+
+我提到的CC的文档完备性指的是什么？
+[[https://code.claude.com/docs/zh-CN/best-practices][最佳实践]]，这是我最看重的，他似乎能告诉我，怎么样才能发挥CC的最佳威力，并且中文版的文档对我而言肯定是更友好的。其他两家似乎并没有这么贴心。
+
+我想用CC实现什么？
+我最近对经济比较感兴趣，所以想写一个前后端分离的web网站，能够管理我学到的经济概念和抓取到的各种数据，以及对我的数据进行可视化，技术栈方面，将会以我最熟悉的SpringBoot技术栈作为后端，我对前端一无所知，但我想用Vue来实现，最终做出一个MVP版本，在此基础上，将我的后端重构为Python和Go（我大概知道这两门语言的语法，不能熟练编程，不知道它们如何写一个后端应用），这个过程中，我会使用vibe coding（在写下这段文本的时候，我只是大概知道vibe coding是一个什么东西，但从来没有这样的实践）
+
+
+**** 我要怎么才能用上CC
+
+***** 美区apple id
+订单号：WTDCNMZRUQBUEUVH
+订单名称：Apple ID 美区账号 (独享) x 1
+商品单价：12.00
+购买数量：x 1
+商品总价：12.00
+邮箱：jsycdut@gmail.com
+支付方式：支付宝
+账号：tzeaor95510l@hotmail.com----密码：Kk123102----朋友：Kk777----工作：Kk888----父母：Kk666----生日：1990-01-01----账号仅限在AppStore使用，不要在系统设置里登录----请务必修改资料：https://getappleid.net/modify-apple-account-information/
+
+辅助邮箱账号密码
+apple_backup@163.com 
+YXBwbGVfYmFja3
+
+更改后的资料
+email: apple_backup@163.com
+密码：MDQyMzA3NDIK_
+安全问题：
+pet: agua
+car: ct5
+team: gsw
+birthday: 19900102
+name: Brest Eric
+接收辅助邮箱的验证：jsycdut@163.com 
+
+==
+
+您好！订单5111274060676001637
+eIquillererinm231@hilarious.com----mrs7FPiHHpVeMY3----fd2e03d7240b7541810db3e230493c3c----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
+专辑名称:20刀【独享成品号】30天售后
+格式：Claude账号/邮箱----邮箱密码----接码令牌----Claude Sk
+
+
+免登录邮箱流程：输入Claude账号登录-复制成品格式的第三段-浏览器打开：https://b.171mail.com/#/home/code?type=claude&token=  粘贴令牌后点击获取即可登录克劳德。
+
+Claude官网登录网址：Claude.ai
+邮箱登录地址：mail.com
+
+==
+
+eIquillererinm231@hilarious.com----mrs7FPiHHpVeMY3----fd2e03d7240b7541810db3e230493c3c----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
+
+***** 注册talkattone
+购买一个talkatone账号，但是这个东西风控太严重，需要国外住宅静态ip，而且会检测你的手机是否开了代理，很明显处理在路由器层面使用透明代理之外，没有其他的办法，并且透明代理也不能保证成功，所以我换了giffgaff的手机号，目前还在路上。
+
+**** 他们说的plan模式是什么
+
+**** 他们让大模型每轮回答结束后都叫一声爸爸是怎么回事
+
+**** 我在使用CC前需要具备什么技能
+
+**** 我的网站长什么样子
+
+**** 让我开始编码
+
+*** 让我们学习一下Claude Code的实战
+[[https://academy.claude-code.club/practical-skills][CC Club，Claude Code实战]]
+要有claude.md，让Claude按我的style来编码，不要乱搞。这个claude.md该怎么写？ 可以参考 [[https://github.com/ruvnet/ruflo/wiki/CLAUDE-MD-Templates][claude md templates]]
+#+BEGIN_SRC markdown
+<!-- claude.md 是一个markdow文件，所以按照markdown的格式来写就行了，注意是要条理清晰-->
+#+END_SRC
+** TODO wireshark备忘
+:PROPERTIES:
+:EXPORT_FILE_NAME: wireshark备忘
+:SLUG: wireshark-basic
+:RELEASE_DATE: 20260219
+:END:
+wireshark是网络抓包分析软件，可以抓取网络上的数据包并进行展示和过滤，对于学习网络知识（应用层、传输层、网络层、数据链路层）有强大的帮助，书本上的知识可以在wireshark上得到验证，自己实际走一趟可以加深对课本的理解。wireshark是一款GUI软件，支持windows、mac和linux（wireshark官网上只写了一个ubuntu，但是其他linux发行部大概率可以通过自己的package manager进行安装，或者通过源码编译的方式获取对应的版本）
+
+使用wireshark，需要用到两个filter，分别是capture filter（要抓取哪些数据包）和display filter（抓取完成后，要展示哪些数据包），他们各自有一套语法，但是都比较易于理解。
+
+#+begin_src 
+// capture filter
+// 采用Berkeley Packet Filter（BPF）语法
+// 包含协议、地址、端口、逻辑组合四个部分
+// 协议，icmp/ip/tcp/udp/http
+// 地址，host 127.0.0.1 任意来源或者目的ip、src host 192.168.1.1来源ip、dst host 127.0.0.1目的ip、net 192.168.1.0/24整个网段
+// 端口，port 80指定端口，或者传输层协议+端口 tcp port 443
+// 逻辑组合， and or not等
+现在，我需要抓取本地127.0.0.1的9998端口的tcp流量
+  tcp and host 127.0.0.1 and port 9998
+
+// display filter
+// 这个是capture filter应用完成之后，已经把包抓好了，我要从中捞出我感兴趣的报文
+// 语法也是四个部分，协议、地址/端口、逻辑组合，以及内容字段匹配
+// 协议 http ssl tls htcp udp ip  
+// 地址/端口过滤，ip.addr/src/dst == 127.0.0.1（ip/来源ip/去向ip），tcp.port/srcport/dstport == 9998（端口/来源端口/去向端口）
+// 逻辑组合，and or not等基础
+
+// 现在，我要过滤127.0.0.1的8080端口的http请求信息
+http && ip.addr==127.0.0.1 and tcp.port==8080
+
+display filter中，可以选中包详情中的某个子项目，然后左下角会展示这个条目的过滤关键字是什么，比如User-Agent是http.user_agent，然后可以采用这个关键字 运算符 值的形式写入display filter，或者右键菜单apply as filter。示例如
+  http.request.method==GET， http.user_agent contains curl
+#+end_src
+
+参考资料
+1. [[https://www.wireshark.org/docs/man-pages/wireshark-filter.html][Wireshark display filter syntax and reference]]
+2. [[https://wiki.wireshark.org/CaptureFilters][CaptureFilters]]
+3. [[https://wiki.wireshark.org/DisplayFilters][DisplayFilters]]
+
+try it~~~~ 
+** TODO mtproxy
+:PROPERTIES:
+:EXPORT_FILE_NAME: mtproxy
+:END:
+1. 参考资料
+   [[https://core.telegram.org/proxy#setting-up-your-own-mtproxy-node][mtproxy官方介绍文章]]
+   [[https://github.com/TelegramMessenger/MTProxy][mtproxy github]]
+2. 理解
+   mt proxy可以提供一个连接telegram服务器的中转站，这个中转站由ip+port+secret标识，telegram客户端可以连接到这个中转站，继而访问telegram服务器。从github上面的使用指南来看，确实有一批telegram服务器的ip。mt proxy是telegram专用链接，无法访问其他任何海外服务，包括Google，Meta，Claude Code等。   
+** TODO Linux环境下的top系列工具
+:PROPERTIES:
+:SLUG: linux-top
+:EXPORT_FILE_NAME: linux环境下的top系列工具
+:RELEASE_DATE: 20260313
+:END:
+在类Unix系统中，top命令可以查看系统里面的进程情况，很多时候，我们需要对进程做一些筛选，比如
+1. 谁占用CPU最高，谁占用内存最高
+2. 进程启动参数，究竟启动的时候传入了哪些参数
+
+top在所有的linux发行版和OS X上面都有，如果是docker容器中，也有类似的docker top命令可供使用，top是最基础的工具，与之相比，提高了使用便利性的工具还包括[[https://htop.dev/][htop]]和[[https://terminaltrove.com/btop/][btop]]。
+
+htop支持cpu、内存可视化的展示，进程关系的树形展示，按照内存、cpu等对cpu排序，方便的kill指令，使得你只需要按几个键就可以达到你的目的，你只需要花费10分钟，看一下界面布局，然后按F1查看一下帮助信息，并且把界面上的F1-F10全部按一遍，就可以学会它。而btop则更加华丽并且易用，你看到界面中的红色表示的内容，比如1~4，或者对应的字母，按一下对应的内容，也就很自然的学会了，这使得你无需先去看一下help才能操作，btop的help菜单更多是针对UI展示内容的调节，没有太多需要学习的。
+
+使用htop和btop更多是在偷懒的动作，在我们自己的电脑上，毫无疑问这个东西是方便并且看起来非常fancy的，但是一旦到了服务器的世界，更多的还是top这种最返璞归真的工具，所以，让我们回到top上来。
+
+注意，linux的top和OS X展示的top的内容不一样。
+在OS X上，man top命令的展示内容是 top – display sorted information about processes，Linux上是top - display Linux processes。
+
+在Linux上，top来自procps软件包，而OS X上top则来自内核Darwin，要溯源到BSD，所以两者根本不是一个体系，展示内容不同，使用的语法不同等就可以理解了，而上面提到的htop、btop就没有这个问题，其实按我的理解，htop btop已经是TUI程序了，而非单独的命令行工具。
+
+Linux情况下，top展示内容后常用的快捷键
+| 快捷键 | 含义                                                            |
+| q      | 退出top                                                         |
+| M      | 按照Memory排序                                                  |
+| P      | 按照CPU排序                                                     |
+| c      | 展示完整的命令行参数                                            |
+| u      | 按照用户过滤进程                                                |
+| 1      | 展示所有cpu的负载                                               |
+| f      | 在弹出菜单中，箭头按键选择你的列，然后按s，就可以按你选的列排序 |
+| k      | kill进程，不要输入-1，那个含义是给所有有权的进程都kill掉        |
+Linux下top命令展示的CPU这一行需要注意
+| 指标 | 含义                                                                                                            |
+| us   | user space                                                                                                      |
+| sy   | system                                                                                                          |
+| ni   | nice值低的应用使用的cpu，它们在cpu低的时候才会出来跑                                                            |
+| id   | idle，cpu处于完全空闲的占比，值越高说明它越闲                                                                   |
+| wa   | io waiting，花在等待磁盘或者网络io上的时间，越高说明磁盘或者io越拉                                              |
+| hi   | hardware irq，硬中断，如网卡，磁盘键盘等，越高说明网卡流量高，磁盘繁忙写等                                      |
+| si   | sofrware irq，软中断，如内核为了响应高频的网络数据包或者复杂的内核任务                                          |
+| st   | steal time，你的vps服务商的良心衡量尺。衡量的是宿主机把你的cpu分给其他虚拟机的时间，值越高，说明vps服务商越黑心 |
+us/sy高，说明你程序负载大
+wa高，磁盘拉胯
+st高，你的服务商黑心，超卖太多了
+
+OS X情况下，top默认按照pid排序，可以使用-o选项指定排序键，在展示结果中这个排序键是高亮标记的，可选排序键可以man top后查看-o选项，常见的有
+| 选项       | 含义           |
+| top -o mem | 按照Memory排序 |
+| top -o cpu | 按照cpu排序    |
+
+** TODO 找出那个狂写磁盘的凶手！
+:PROPERTIES:
+:EXPORT_FILE_NAME: 找出那个狂写磁盘的凶手
+:SLUG: find-disk-killer
+:RELEASE_DATE: 20260603
+:END:
+
+加入此刻磁盘告警，如果是一个拥有成熟的监控告警体系的系统，在告警的时候，就要给出指向性的目标信息，比如
+
+1. 某某文件磁盘空间占用异常，一分钟增长量超过1GB（举例）
+2. log.info接口调用量超过每秒阈值500
+
+你作为业务人员，肯定是知道这个文件是什么业务产生的，也可以根据log.info/error的日志信息知道打日志的是什么业务，就知道哪里有问题了，然后就是隔离这个异常实例并保存它，隔离使得这个错误不会影响其他正常的业务，保存下来的现场使得你有机会可以仔细去分析问题产生的原因。
+
+这是一个合格的监控告警系统该做的事情。
+
+但是如果你没有这样的系统，针对磁盘这样的东西，你大概率需要下面这些东西
+1. top，发现cpu的wa很高（超20%），说明磁盘非常繁忙
+2. iostat -x 1，查看io信息，关注 %util（利用率）await（等待时间）是否非常高，然后看看rkB/s wkB/s（读写量），判断是读还是写导致的，如果读写都不高但是%util高，可能是随机小文件读写多，通过这一步，看到整体io情况，注意，iostat属于systat包，需要安装它
+3. iotop，查看磁盘读写的情况，注意下方的帮助信息，可以让你按照指定列排序，通过PID那一列你就知道是谁在消耗磁盘io了
+4. pidstat -d 1，每隔1秒输出磁盘信息，查看到你的磁盘读写信息，其实和iotop类似，通过以上内容，已经基本可以知道是谁在
+
+当你知道是磁盘写的问题的时候，iotop是最有用的，他可以按照写磁盘排序，一眼就知道是谁有问题，看下方我的模拟写磁盘的代码，以及排查记录
+#+BEGIN_SRC java
+  @Test
+  public void testWriteEndless() throws Exception {
+    System.out.println("write");
+    File file = new File("endless");
+    try (FileWriter fw = new FileWriter(file, StandardCharsets.UTF_8, true)) {
+      while (true) {
+        String content = UUID.randomUUID().toString();
+        fw.append(content);
+      }
+    }
+  }
+#+END_SRC
+
+排查图[[file:assets/ io_usage_sample.jpeg][排查磁盘io高案例]]
+** TODO 找出那个狂占带宽的凶手！
+:PROPERTIES:
+:EXPORT_FILE_NAME: 找出那个狂占带宽的凶手！
+:END:
+** TODO PD/DP/TypeC/Thunderbolt傻傻分不清楚
+:PROPERTIES:
+:EXPORT_FILE_NAME: pd-dp-typec-thunderbolt傻傻分不清楚
+:SLUG: calbles-and-protocols
+:RELEASE_DATE: 20260323
+:END:
+| 概念        | 所属范围 | 说明                                                                                                                                                                                                                                                                                    |
+| 线缆        | 物理范围 | 我们用来连接各种设备的东西就是线缆，手机、手表、电脑的充电线、电脑和显示器之间的连接线，在物理上把设备和设备连接起来                                                                                                                                                                    |
+| PD          | 抽象概念 | PD，Power Delivery，即电力输送协议，这个协议是用来给设备之间沟通怎么充电的，比如使用一根线缆给设备充电，输入端功率100w，输出端只接受最大60w，那么这个协议可以让双方沟通到这些信息，使得在线缆中的传输的电力是符合双方需求的                                                             |
+| VGA         | 抽象概念 | VGA，Video Graphics Array，1987年IBM主导的使用模拟信号的电脑显示标准，目前属于老古董设备专用接口                                                                                                                                                                                        |
+| HDMI        | 抽象概念 | HDMI，即High Definition Multimedia Interface，高清多媒体界面协议，也是用来传输影音信息的，但是它是由电视厂商主导的协议，始于2002年，用的是数字信号                                                                                                                                      |
+| DP          | 抽象概念 | DP，Display Port，展示端口协议，是用来传输影音信息的，是由显示器厂商主导的协议，始于2006年，用的也是数字信号，是奔着把VGA干死的目标去的                                                                                                                                                 |
+| type c      | 抽象概念 | type c，也叫 usb type c，或者usb c，是一个描述硬件的概念，指的是24针引脚、不区分正反面，长的是椭圆形，能用于电力或者数据传输的线缆，在这个usb c之前，是一个叫USB A的口子，就是我们电脑上可以插U盘、鼠标、键盘的那个硬件接口                                                             |
+| thunderbolt | 抽象概念 | thunderbolt，雷雳协议，是由Apple和Intel主导的大而全协议，thunderbolt = pd + dp + PCie，所以这个协议能充电，能传输视频音频数据，也能传其他数据                                                                                                                                           |
+| xx口        | 物理范围 | xx口，比如你显示器有个DP口，HDMI口，你的手机有个type c口，你的macbook pro有thunderbolt口（雷雳口），其实它们指的都是这个口需要跑什么协议，你插进来的线缆，必须要支持这个协议，才能正常工作，一个xx口，可以从两方面来看，一是物理方面，它的形状，比如HDMI口和长得就和thunderbolt口不一样 |
+
+在之前，基本上每个协议，都有自己的物理接口，比如VGA协议就有自己的VGA口，DP协议也有自己的DP口，各自为战，这种分裂就可能导致你的设备有多个形状的口子，随着时间的发展，大家都慢慢的挤进了type c这个形状的线缆里面，典型的就是mac的thunderbolt口，这个口子物理上就是个type c口，但是协议上它能跑PD给自己充电，能跑DP让它外接显示器，能插type c口子的u盘传输数据，感觉以后电脑上会只剩下type c口子。
+
+买设备的时候，需要看清楚，这个机子有什么口子，如果是type c扣子，要搞清楚这个口子能跑什么协议，能不能跑pd决定了这个口子能不能给你的机子充电，能不能跑dp决定了这个口子能不能外接显示器，不要眼里只有个type c的形状~~
+** TODO go项目文件结构解析
+:PROPERTIES:
+:SLUG: go-project-files
+:EXPORT_FILE_NAME: go项目文件结构解析
+:RELEASE_DATE: 20260403
+:END:
+ [[https://github.com/golang-standards/project-layout/blob/master/README_zh-CN.md][go项目目录结构]]
+ | go语言概念 | 外在文件体现                       | 用途                                                                                                  |
+ | go文件     | 一个后缀名为go的文本文件           | 放置go语言代码                                                                                        |
+ | go包       | 一个文件夹，里面可以放置多个go文件 | go包用于组织多个相关的go文件到一起，go包里面的所有go文件里面的第一行声明包的名称，必须都是package xxx |
+ | go.mod文件 | 一个名为go.mod的文本文件           | 组织多个go包，声明这是一个go模块，标记这个模块的全球唯一标识符、自己所需的go语言版本、对其他包的依赖  |
+
+我们用包(package)来组织多个go代码源文件，然后使用模块（module）组织多个包，让多个包可以以一个统一的身份进行发布，所以我们可以把go项目看成源文件、包、模块的三级结构。具体上可以理解为
+go文件就是源代码纯文本文件，一个文件夹下面的多个go文件我们说们属于同一个包，这个文件夹下面的go文件的第一行都是package xxx（xxx一般是这个go文件所在的文件夹的名字），包里面任意一个源文件中定义的函数、类型、变量、常量等对同一包中的其他源文件都可见。
+模块(module)是有关联的go包的集合，它们在一起被发布、版本化和分发。模块可以直接从版本控制仓库(github gitlab)或者模块代理服务器(GOPROXY指定的地址)下载。
+ go语言的包存放在文件夹里面，文件夹可以嵌套，每个深度的文件夹里面都可以声明自己的包，但是这些包不存在任何嵌套关系，它不像java里面那种com.xxx.x.y.z这样的存在深度以及继承关系的，go语言里面的包都是平级的，没有等级和继承关系。go包建议包名和所在的文件夹的名字一样，除非你是main包，一个文件夹下面也不允许多个go包的存在，一个文件夹就一个包，这里也存在一个例外，那就是_test包，它是用来搞测试的，但是它的名字也需要被叫做 ~被测试的报名_test~ ，也不能乱起名。
+
+ 在go语言的世界里面，大家都是以 ~模块~ 的身份来行走江湖的，模块的go.mod文件，就声明了我是谁，我需要至少什么版本的go，我需要哪些其他模块来支持我的工作之类的信息，它对标记一个模块至关重要，没有这个文件，你就没有在这个世界 的通行证。
+
+一开始练练go的语法，就一个main.go就行了，但是到了工业级开发的时候，就需要一些条条框框，来把不同用途的东西给区分和组织起来，这就是所谓的go项目结构，目前受开发者公认的是 [[https://github.com/golang-standards/project-layout][go标准项目结构介绍]]，简要介绍如下
+
+#+BEGIN_SRC bash
+➜  go-sample tree .
+.
+├── api 和openapi和swagger相关的，基本都是些json文件，用于定义项目提供的接口文档信息
+├── assets 项目中用到的资源文件，比如图标、图片之类的
+├── build 用于项目打包、持续集成，把项目搞成一个可执行文件、放到云端就靠这个
+├── cmd 程序入口，一般而言 func main() 就在这里的文件里面，可以有多个func main，打包的时候选一个就行了
+│   └── jsy-app
+│       ├── entry.go 比如func main就在这里里面
+├── configs 配置文件，你的config.yaml之类的东西，go中用的配置一般是confd或者consul-template库来做配置
+├── deployments 微服务部署相关，比如IaaS PaaS，容器编排等
+├── docs 设计和用户文档
+├── examples 应用程序或者公共库的使用示例，告诉别人你的代码怎么用
+├── githooks git钩子文件，比如提交之前执行代码格式化，检查风格等
+├── go.mod 标记你的go模块，好出去行走江湖
+├── init 系统初始化和进程管理相关配置（systmed upstart sysv, runit supervisord）
+├── internal 不愿对外透露的go源码，放到这个包里面，就说明这个代码我不外漏给别人用，要漏出去的在pkg里面
+│   └── pri.go
+├── pkga 想要对外漏出去的代码
+├── scripts 用于执行构建、分析、安装的脚本，很可能被build文件夹用到
+├── test 测试文件夹
+├── third_party 外部辅助工具，比如那个展示接口信息的swagger ui
+├── tools 这个项目支持的工具，可以用pkg和Internal的代码
+├── vendor 应用程序的依赖关系，有了go.mod了，一般不要vendor了
+├── web web应用所需的资源，比如静态web资源（favicon、网站素材图片等），单页应用、服务端模板等
+└── website 如果不使用github pages，就在这里放置项目的网站数据
+#+END_SRC
+** TODO go语言构建扫盲
+:PROPERTIES:
+:SLUG: go-build
+:EXPORT_FILE_NAME: go语言构建扫盲
+:RELEASE_DATE: 20260404
+:END:
+go语言涉及一些环境变量，GOPATH、GOROOT、GOMODCACHE、GOPROX、GO111MODULE，都是些什么意思
+| 环境变量    | 含义                                     | 补充说明                                      |
+| GOROOT      | GO语言安装目录                           | 包含了核心的go命令                            |
+| GOPATH      | 存放第三方模块源代码，或者相关可执行文件 | 可执行文件比如go的lsp服务端gopls，调试工具dlv |
+| GOMODCACHE  | 处于GOPATH之下，用于存放第三方模块源代码 |                                               |
+| GOPROXY     | GO下载依赖的模块走的代理路径             |                                               |
+| GO111MODULE | 111代表go1.11，这里意思是启动go模块特性  | 现在都是启动了的                              |
+
+一个go项目，如何声明所需依赖，如何打包成可执行文件，如何弄到服务器上跑起来。相关命令有get、build、mod、install、clean，他们是怎么协作的？
+| 命令    | 用途                                          | 补充说明                                            |
+| get     | 下载go模块源代码到GOMODCACHE                  |                                                     |
+| build   | 把go包或者go文件编译成可执行文件              |                                                     |
+| clean   | 清理go build遗留下来的东西                    |                                                     |
+| install | 构建产物，并且把二进制可执行文件放到GOBIN里面 | 没GOBIN，就放到GOPATH/bin                           |
+| mod     | 模块管理，它会调用get命令处理依赖             | 基本上一个go mod tidy就可以给你处理好项目的所有依赖 |
+
+所以，拿到一个go项目，直接go mod tidy，就可以搞定依赖，然后找到你的func main()，go build这个func main()所在的目录，就可以拿到可执行文件了。
+go语言中的项目核心是模块，模块由go.mod定义，其中可用的指令可以参考[[https://golang.ac.cn/ref/mod#go-mod-file-exclude][Go Modules参考]]
+** TODO Go语言学习
+:PROPERTIES:
+:SLUG: learn-go
+:EXPORT_FILE_NAME: go语言学习
+:RELEASE_DATE: 20260410
+:END:
+
+参考
+- [[https://golang.ac.cn/doc/][官方学习资料]]
+[[https://golang.ac.cn/doc/effective_go][- 高效Go编程]]
+- [[https://www.topgoer.com/go%E5%9F%BA%E7%A1%80/][国内Go学习资料]]
+- [[https://github.com/coderit666/GoGuide][Go语言学习指南]]
+- [[https://github.com/coderit666/CNote][C语言学习指南]]，Go和C有一定关系，可以了解一下C
+- [[https://golang-china.github.io/gopl-zh/][Go语言圣经]]
+- [[https://golang.xiniushu.com/guide.html][Golang中文学习文档]]
+- [[https://golangguide.top/][GoLang全栈指南]]
+- [[https://google.github.io/styleguide/go/][google的go代码风格]]
+实战项目
+[[https://github.com/onexstack/miniblog][- mini blog]]
+- [[https://github.com/dujiao-next/dujiao-next][卡密系统]] 目前很多网上小站卖虚拟卡密或者其他商品的一个系统
+
+自己敲代码
+- [[https://github.com/jsycdut/learn-computer-programming-languages/tree/main/golang][golang基础-自己敲一遍]]
+
+** TODO 常见开源协议
+:PROPERTIES:
+:EXPORT_FILE_NAME: 常见开源协议
+:END:
+** TODO 编程solid原则
+:PROPERTIES:
+:EXPORT_FILE_NAME: 编程solid原则
+:SLUG: solid-principle
+:RELEASE_DATE: 20260415
+:END:
+SOLID由Robert C. Martin在21世纪早期提出的面向对象设计和编程的5个基本原则。
+- [[https://blog.cleancoder.com/uncle-bob/2020/10/18/Solid-Relevance.html][Robert C. Martin回复SOLID]]
+
+| 缩写 | 英文词                              | 中文含义     | 介绍                                                     |
+| S    | The Single Responsibility Pricinple | 单一功能原则 | 对象应该具有一种单一功能                                 |
+| O    | The Open Closed Principle           | 开闭原则     | 软件对扩展开放，对修改关闭                               |
+| L    | The Liskov Substitution Principle   | 里氏替换原则 | 程序中的对象在不改变正确性的前提下，可以被他的子类所替换 |
+| I    | The Interface Segregation Principle | 接口隔离原则 | 多个特定的接口要好于一个宽泛用途的接口                   |
+| D    | The Dependency Inversion Principle  | 依赖倒置原则 | 依赖于抽象，而非是一个一个具体的实例                     |
+** TODO JS扫盲
+:PROPERTIES:
+:SLUG: js-basic
+:EXPORT_FILE_NAME: js扫盲
+:RELEASE_DATE: 20260419
+:END:
+| 概念            | 所属范围                     | 含义                                                       | 备注 |
+| JavaScript      | 编程语言                     | 那个已经逐渐靠近现代世界的乱七八糟的静态语言               |      |
+| TypeScript      | 编程语言                     | JavaScript加了一套类型系统铠甲                             |      |
+| Node.js         | 底层运行时                   | 现在毫无疑问的王者，服务端你还是得用它                     |      |
+| Bun             | 底层运行时                   | 新秀，已经有自己的bun，分庭抗礼npm                         |      |
+| Deno            | 底层运行时                   | node.js大佬的救赎之作，但是我不喜欢                        |      |
+| Next.js         | 全栈框架                     | 基于React的全栈框架，还是得跑在node.js上面                 |      |
+| Nuxt.js         | 全栈框架                     | 基于Vue的全栈框架，依然需要node.js                         |      |
+| CommonJS (CJS)  | 模块化规范,Nodejs生态的      | 使用require引入其他模块，module.exports导出模块            |      |
+| ES Modules(ESM) | 模块化规范，JavaScript官方的 | 时代最终是要用它的，使用import引入其他模块，export导出模块 |      |
+** TODO Meta-Learning编程语言
+:PROPERTIES:
+:SLUG: meta-programming
+:EXPORT_FILE_NAME: meta-learning编程语言
+:RELEASE_DATE: 20260423
+:END:
+我的目的是，以不变应万变。用一套通用的编程语言学习框架，去套不同的语言，换言之，我认为所有编程语言都是一样的。它建立在以下假设中
+1. 存在一个元编程语言(Meta Programming Language)M，M具有特性(M0, M1, M2, ....)
+2. 任何其他编程语言N，都拥有M特性Mx在N中的映射Nx，Mx和Nx在本质上是相同的，只是外在表现不同而已
+
+下面是我对M中的特性的定义
+| 分类        | 特性            | 描述                                                                             | 补充说明             |
+| hello world | 运行hello world | 代码构建工具、运行环境、编程IDE                                                  |                      |
+| 类型        | 类型            | 静态(编译时确认类型)/动态(运行时确认类型)、强(不允许隐式类型转换)/弱（允许）类型 |                      |
+| 量          | 量的声明        | 可变量、不可变量                                                                 |                      |
+| 量          | 量的类型        | 数值、字符串、布尔、函数                                                         |                      |
+| 量          | 量的势力范围    | 作用域、生命周期                                                                 |                      |
+| 量          | 复合的量        | 多个量打包到一起，把可复用代码封装成为函数/方法、类/结构体                       |                      |
+| 载体        | 存放量的载体    | 数组、动态列表、键值对                                                           | 载体的增删改查、遍历 |
+| 逻辑控制    | 逻辑控制        | 顺序、分支、循环、递归、跳转                                                     |                      |
+| 并发        | 多CPU利用       | 并发、异步编程                                                                   |                      |
+| 内存管理    | 底层内存管理    | 手动管理/自动管理                                                                |                      |
+| 风格        | 异常/错误风格   | 代码总会出错的，出错时的处理哲学                                                 |                      |
+| 风格        | 数据组织风格    | 面向对象OOP/函数式编程FP                                                         |                      |
+| 风格        | 代码组织风格    | 导出/引用文件中的代码                                                            |                      |
+| 生态        | 生态势力        | 自带工具库(io、日期时间、网络)/三方工具库（web领域、数据加工领域）               |                      |
+| 生态        | 代码规范        | 业界代码风格检查(formatter)、代码静态检查(linter)                                |                      |
+| 生态        | 质量检查        | 代码测试框架(unit test)                                                          |                      |
+| 练手        | 实际练手项目    | 控制台计算器/todo应用/本地文件搜索器/网络爬虫/HTTP服务器+数据库使用              |                      |
+
+** TODO PS命令
+:PROPERTIES:
+:SLUG: linux-ps
+:EXPORT_FILE_NAME: ps命令
+:RELEASE_DATE: 20260427
+:END:
+linux和mac上面的ps命令是不同的，一个是linux风格，一个是bsd风格。linux上的ps属于procps-ng包，支持三种风格，BSD(参数前面不带短横线)，UNIX（参数前面带一个短横线）， LINUX（参数前面带两个短横线），经过在mac和linux上对ps进行使用后，结合实际的需求，我很大概率只需要查询所有的进程，并且grep掉我需要的进程名称，这个需求等价于查指定名称的进程而已，这个在htop、btop里面已经可以做到了。
+
+所以对于我而言，有价值的ps命令是
+#+BEGIN_SRC bash
+  # 3个命令都是查所有进程
+  ps -ef (e: 查出所有进程  f:全格式输出)
+  ps -elf (l: 长格式输出 y: 不展示flag)
+  ps aux ( a: 有tty的进程 u: 面向用户的格式 x: 无须要有tty)
+#+END_SRC
+** TODO nginx配置
+:PROPERTIES:
+:EXPORT_FILE_NAME: nginx配置
+:SLUG: nginx
+:RELEASE_DATE: 20260513
+:END:
+- [[https://www.cnblogs.com/54chensongxia/p/12938929.html][nginx配置文件详解]]
+
+nginx配置文件以块级结构进行划分，并且某些块内还可以嵌套
+#+BEGIN_SRC
+  global块，指定nginx运行用户、工作进程个数、日志文件位置、进程pid文件位置
+  events，性能相关配置，如接收多少个连接，使用什么io模型，
+  http，http服务相关配置，存在典型的嵌套 http->server->location三级结构，server声明http服务，location配置http的url映射信息
+  mail，邮件相关配置，配置邮件端口，邮件协议等
+  stream，四层TCP/UDP代理服务块，比如转发3306到后端数据库为止
+#+END_SRC
+** TODO 权利的结构
+:PROPERTIES:
+:EXPORT_FILE_NAME: 权利的结构
+:END:
+
+从权力的视角，有四套班子
+- 四套班子。党委、人大、政府、政协
+  - 党委。党领导一切，决策一切
+  - 人大。权力机关，授权任命
+  - 政府。行政机关，具体落地
+  - 政协。统一战线，参政议政，政治协商
+  - 纪委监委。反贪反腐，是四套班子之外新增的。
+
+从国家宪法和法律角度，有一府两院
+- 一府两院。政府、人民法院、人民检察院
+  - 政府。管社会民生，经济建设
+  - 人民法院。管罪犯审判
+  - 人民检察院。管司法公正
+  - 纪委监委。新派生的，管监察
+
+一个法定的一级地方政府建制，会配齐一府两院和四套班子，一般到市辖区、县级市、县一级，这些都是齐全的。
+
+在成都，12区、5县级市、3县，都是有自己的一府两院的。县级市是一个特殊的存在，县级市一般是省辖、省会城市代管，比如成都的都江堰市、彭州市、邛崃市、崇州市、简阳市，都是四川省辖、成都代管，它们和县同行政级别，但是它们的经济组成已经不再以农业为主，人口也不以农村户口为主，管理核心也不再是乡村、基础设施和农业生产，而是更偏向于城市方面，比如经济上大多是以商业活动、工业、旅游业、服务业等为主，他们不再种田了，更偏向于城市化了。比如彭州承接了成都外溢的工业，都江堰主要是旅游业，邛崃白酒（中国最强的基酒）和食品加工产业，崇州家具、手工和商贸发达，简阳有机械制造和农业加工。
+** TODO Java的IO体系
+:PROPERTIES:
+:EXPORT_FILE_NAME: java的io体系
+:SLUG: java-io
+:RELEASE_DATE: 20260517
+:END:
+java的IO体系主要包含字节流，字符流两大块，拥有清晰的继承体系，需要带着功能去看IO体系的设计。
+- [[https://www.cnblogs.com/noteless/p/9613518.html][Java IO体系整体设计思路]]
+- [[https://javabetter.cn/io/shangtou.html][Java IO体系代码实例]]
+- [[https://pdai.tech/md/java/io/java-io-overview.html][Java IO知识体系详解]]
+- [[https://plantuml.com/zh/class-diagram][plantuml类图]]
+
+- [[https://www.cnblogs.com/noteless/category/1295623.html?page=2][Java IO解析，好文，绝对是好文]]
+
+- 
+#+BEGIN_SRC plantuml :file lis.png
+@startuml
+  interface  AutoCloseable
+  interface  Closeable
+  AutoCloseable <|-- Closeable
+  abstract class InputStream
+  abstract class NonBlockingInputStream
+  Closeable <|.. InputStream
+  InputStream <|-- PipeInputStream
+  InputStream <|-- PipedInputStream
+  InputStream <|-- FileInputStream
+  InputStream <|-- FilterInputStream
+  InputStream <|-- ByteArrayInputStream
+  InputStream <|-- ObjectInputStream
+  InputStream <|-- SockeInputStream
+  InputStream <|-- SequenceInputStream
+  InputStream <|-- StringBufferInputStream
+  InputStream <|-- ChunkedInputStream
+  InputStream <|-- NonBlockingInputStream
+  FilterInputStream <|-- BufferedInputStream
+  FilterInputStream <|-- DataInputStream
+  FilterInputStream <|-- LineNumberInputStream
+  FilterInputStream <|-- PushbackInputStream
+
+  abstract class Reader
+  interface Readable
+  Readable <|.. Reader
+  Closeable <|.. Reader
+  Reader <|-- PumpReader
+  abstract class NonBlockingReader
+  Reader <|-- NonBlockingReader
+  Reader <|-- CharArrayReader
+  Reader <|-- PipedReader
+  Reader <|-- StringReader
+  Reader <|-- InputStreamReader
+  Reader <|-- BufferedReader
+  Reader <|-- FilterReader
+  Reader <|-- ReaderUTF8
+  Reader <|-- ReaderUTF16
+
+  InputStreamReader <|-- FileReader
+  NonBlockingReader <|-- NonBlockingReaderImpl 
+  BufferedReader <|-- LineNumberReader
+  FilterReader <|-- PushbackReader
+  
+  @enduml
+#+END_SRC
+
+#+RESULTS:
+[[file:lis.png]]
+** TODO Java代理
+:PROPERTIES:
+:EXPORT_FILE_NAME: java代理
+:END:
+参考已有项目
+- [[https://github.com/arloor/socks5][socks5]]
+- [[https://github.com/arloor/HttpProxy][http proxy]]
+- [[https://github.com/arloor/connect][connect]]
+- [[https://github.com/3813g00c/flycat][flycat]]
+- [[https://github.com/fatedier/frp][frp]]
+** TODO 排序算法
+:PROPERTIES:
+:EXPORT_FILE_NAME: 排序算法
+:SLUG: sort-algorithms
+:RELEASE_DATE: 20260523
+:END:
+
+在lintcode的[[https://www.lintcode.com/problem/463/][整数排序]]这个题里面验证手写排序算法的正确性。对于排序算法，重要的是理解算法的工作机制，剩下的都是对这个机制的代码实现。
+[[https://sortvisualizer.com/heapsort/][SortVisualizer]] 给出了多个排序算法的多语言实现，语言特性导致同一个机制也可能有不同的写法，感受同一机制在不同的的语言特性下的实现。
+#+BEGIN_SRC java
+public class Solution {
+    /**
+     * @param a: an integer array
+     * @return: nothing
+     */
+    public void sortIntegers(int[] a) {
+        // selectionSort(a);
+        // bubbleSort(a);
+        // insertionSort(a);
+        // shellSort(a);
+        // quickSort(a, 0, a.length-1);
+        // mergeSort(a, 0, a.length-1);
+        heapSort(a);
+    }
+
+     void swap(int[] arr, int i, int j) {
+        int temp = arr[i];
+        arr[i] = arr[j];
+        arr[j] = temp;
+    }
+
+    // 选择排序是把数组划分为两段，左边是已排序列表，右边是未排序列表，每次从未排序列表里面选最小的一个放到左边已排序列表的末尾
+    // 关键是要理解这两段列表
+    void selectionSort(int[] nums) {
+        int len = nums.length;
+        for (int i = 0; i < len; i++) {
+            int min = i;
+            for (int j = i; j < len; j++) {
+                if (nums[j] < nums[min]) {
+                    min = j;
+                }
+            }
+            swap(nums, i, min);
+        }
+    }
+
+    // 冒泡排序模拟的是水中气泡上浮的过程，大泡泡先到水面，小泡泡就要慢点，遵循的是把大泡泡挪到后面
+    // 它是从头开始依次比较两个数字，如果两个数字前大后小，则交换，一路比较一路交换，把这里面的最大的数字交换到它的最后
+    // 选择排序是前半部分有序，后半部分排序的时候无序
+    // 冒泡则是后半部分有序，前半部分无序
+    void bubbleSort(int[] nums) {
+        int len = nums.length;
+        for (int i = 0; i < len ; i++) {
+            for (int j = 0; j < len - i - 1; j++) {
+                if (nums[j] > nums[j+1]) {
+                    swap(nums, j, j+1);
+                }
+            }
+        }
+    }
+
+    // 插入排序看起来和选择排序类似，都是左边一个已排序列表，右边一个未排序列表
+    // 但是插入排序是从未排序列表里面挑第一个，把它塞入到左边已排序列表中的合适位置
+    // 具体来说是从已排序列表末尾的位置开始，一个个的和已排序列表中的比较
+    // 已排序列表中比他大的依次往后坐，最终给他腾出一个位置来
+    void insertionSort(int[] nums) {
+        int len = nums.length;
+        for (int i = 1; i < len; i++){
+            int key = nums[i];
+            int j = i - 1;
+            while (j >= 0 && nums[j] > key) {
+                swap(nums, j, j+1);
+                j--;
+            }
+            nums[j+1]=key;
+        }
+    }
+
+    // shellSort是优化版本的插入排序，所以它肯定也有比较、挪位置、交换这几个步骤
+    // 但是它是弄了多个步长的，一开始从len/2步长，然后逐渐减半来的，所以它的比较对象、交换对象都是间隔了对应步长的
+    // 最后这个步长退化为1，
+    void shellSort(int[] nums) {
+        int len = nums.length;
+        // 初始步长为半个数组长度，然后半数衰减，直到为1（一定能衰减到1，因为整数除2是向下取整的）
+        for (int distance = len/2; distance > 0; distance /= 2) {
+            for (int i = distance; i < len; i++) {
+                for (int j = i - distance; j >= 0; j -= distance) {
+                    if (nums[j] <= nums[j+distance]) {
+                        break;
+                    }
+                    swap(nums, j , j+distance);
+                }
+            }
+        }
+    }
+
+    // 快速排序是分治思想的提现，另一个分治的排序算法是归并排序
+    // 快排的思路是选一个数作为基准数，将整个数组分为两半，左边的值都小于基准数，右边的数都大于基准数，然后对基准数左边和右边分别再重复这个过程
+    void quickSort(int[] nums, int low, int hi) {
+        if (low >= hi){
+            return;
+        }
+
+        int pivoitIdx = partition2(nums, low, hi);
+        quickSort(nums, low, pivoitIdx - 1);
+        quickSort(nums, pivoitIdx + 1, hi);
+    }
+
+    int partition(int[] nums,  int low, int high) {
+        int pivot = nums[high];
+        int i = low;
+        while (low < high){
+            if (nums[low] < pivot) {
+                swap(nums, i, low);
+                i++;
+            }
+            low++;
+        }
+
+        swap(nums, i, high);
+        return i;
+    }
+
+    int partition2(int[] nums, int left, int right) {
+        int pivotVal = nums[left];
+        int low = left + 1;
+        int hi = right;
+        while (low <= hi) {
+            while (low <= hi && nums[low] <= pivotVal) {
+                low++;
+            }
+
+            while (low <= hi && nums[hi] >= pivotVal) {
+                hi--;
+            }
+
+            if (low < hi) {
+                swap(nums, low, hi);
+                low++;
+                hi--;
+            }
+        }
+
+        swap(nums, hi, left);
+        return hi;
+    }
+
+    // 归并排序也是分治的思想，把一段区间不断二分，直至无法分割，然后把他们一段段的合并起来，这样就形成了不断增长的有序结构
+    // 分，在哪里分
+    // 治，分出来的每一段怎么处理
+    // 合，如何把每一段的结果拼接起来
+    void mergeSort(int[]nums, int l, int r) {
+        if (l >= r) {
+            return;
+        }
+        int mid = (l + r) >>> 1;
+        mergeSort(nums, l, mid);
+        mergeSort(nums, mid+1,r);
+        merge(nums, l, mid, r);
+    }
+
+    void merge(int[] nums, int l , int mid, int r) {
+        int id = 0;
+        int i = l;
+        int j = mid + 1;
+        int[] copy = new int[r -l+1];
+        while (i <= mid &&  j <= r) {
+            if (nums[i] <= nums[j]) {
+                copy[id] = nums[i];
+                i++;
+            }else {
+                copy[id] = nums[j];
+                j++;
+            }
+            id++;
+        }
+
+        while (i <= mid){
+            copy[id] = nums[i];
+            i++;
+            id++;
+        }
+
+        while (j <= r) {
+            copy[id] = nums[j];
+            id++;
+            j++;
+        }
+
+        for(int k = 0;k < copy.length;k++) {
+            nums[k+l] = copy[k];
+        }
+    }
+
+    // 堆化，把一个索引的值，调整到适合它的位置，这里要求它是最大的那个
+    void heapify(int[] nums, int endIndex, int point) {
+        int max = point;
+        int left = 2 * point + 1;
+        int right = 2 * point + 2;
+        if (left <= endIndex && nums[left] >= nums[max]) {
+            max = left;
+        }
+
+        if (right <= endIndex && nums[right] >= nums[max]) {
+            max = right;
+        }
+
+        if (max != point) {
+            swap(nums, point, max);
+            heapify(nums, endIndex, max);
+        }
+
+        
+    }
+    void heapSort(int[] nums) {
+        int len = nums.length;
+        for (int i = nums.length/2 -1; i >= 0; i--) {
+            heapify(nums, nums.length - 1,i);
+        }
+
+        for (int i = len-1; i>0; i--) {
+            swap(nums, 0, i);
+            heapify(nums, i-1, 0);
+        }
+
+    }
+}
+#+END_SRC
+** TODO claude怎么就装死了？
+:PROPERTIES:
+:SLUG: dead-claude
+:EXPORT_FILE_NAME: claude怎么就装死了
+:RELEASE_DATE: 20260527
+:END:
+装死：指的是我的claude的桌面端版本打开就是白屏，我一度以为自己下载到了假的claude，怎么重启应用都没用。
+
+Mac OS环境，安装了Claude Code的命令行版本和桌面端版本，众所周知claude需要网络环境，在命令行里面我配置了http_proxy和https_proxy这两个配置，启动claude没有问题
+#+BEGIN_SRC bash
+➜  OpenWhip git:(main) ✗ export http_proxy=http://127.0.0.1:8118 && export https_proxy=http://127.0.0.1:8118                                                                                                  [0/24]
+➜  OpenWhip git:(main) ✗ claude
+╭─── Claude Code v2.1.128 ─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────╮
+│                                                    │ Tips for getting started                                                                                                                                    │
+│                  Welcome back xxx
+#+END_SRC
+
+但是桌面端就是装死，打开就白屏，针对普通患者，大概率可以通过配置代理变量然后启动桌面端的二进制文件来解决
+#+BEGIN_SRC bash
+http_proxy="http://127.0.0.1:7890" https_proxy="http://127.0.0.1:7890" open "/Applications/Google Chrome.app"
+#+END_SRC
+
+但是claude的桌面端就不吃这一套，它是一个electron应用(安装目录里面有asar文件)，不读我的代理配置，需要通过 ~--proxy-server~ 来传递代理配置，才能访问它的目标网络
+#+BEGIN_SRC bash
+➜  MacOS cd
+➜  ~ /Applications/Claude.app/Contents/MacOS/Claude --proxy-server="http://127.0.0.1:8118"
+ERROR: Unrecognized attribute string flag '?' in attribute string "T@"NSString",?,R,C" for property debugDescription
+ERROR: Unrecognized attribute string flag '?' in attribute string "T@"NSString",?,R,C" for property debugDescription
+#+END_SRC
+
+听说还有一个叫 =Proxifier= 的东西，可以接管应用流量，有机会我试试~~
+** TODO SQL Data Types
+:PROPERTIES:
+:EXPORT_FILE_NAME: sql-data-types
+:END:
+
++ [[https://courses.cms.caltech.edu/cs123/sql99std/ansi-iso-9075-2-1999.pdf][SQL数据类型草案-1999]]
++ [[https://dev.mysql.com/doc/refman/8.0/en/data-types.html][MySQL Data Types]]
++ [[https://www.postgresql.org/docs/current/datatype.html][PostgreSQL Data Types]]
++ [[https://docs.oracle.com/en/database/oracle/oracle-database/19/sqlrf/Data-Types.html][Oracle Data Types]]
+
+基本可以分为数值类型（精确、非精确）、字符串类型（定长、变长）、日期时间类型（日期、时间、日期时间、时间戳）、二进制数据，SQL标准做了数据类型的定义，但是各大数据库厂商都是活爹，对SQL标准的实现也是大部分遵从，小部分自己魔改。从一开始学习编程的时候用的的MySQL，到后面达梦自己做的DM7，以及图数据库，蚂蚁集团用的OceanBase，招商银行使用的Oracle以及基于PostgreSQL魔改的GuassDB，也算是接触了比较多的数据库类型了。下面以数据库的维度进行下归纳
+| 一级分类 | 二级分类   | 三级分类 | DataType       | 容量限制          | 示例 | 备注                                                                                                           |
+| 数值     | 精确数值   | 整数     | tinyint        | 1 Byte 二进制范围 |      | 自从MySQL8.0.17开始，整数类型的展示宽度，也就是tinyint(1)里面的这个(1)已经标记废弃了，宽度填充ZEROFILL也废弃了 |
+| 数值     | 精确数值   | 整数     | smallint       | 2 Byte 二进制范围 |      |                                                                                                                |
+| 数值     | 精确数值   | 整数     | meidumint      | 3 Byte 二进制范围 |      |                                                                                                                |
+| 数值     | 精确数值   | 整数     | int            | 4 Byte 二进制范围 |      | 别名integer                                                                                                    |
+| 数值     | 精确数值   | 整数     | bigint         | 8 Byte 二进制范围 |      | serial是bigint unsigned not null auto_increment unique的别名                                                   |
+| 数值     | 精确数值   | 小数     | decimal[(M,D)] |                   |      | 别名numeric, fixed，没有number类型                                                                             |
+| 数值     | 非精确数值 | 小数     | float[(M, D)]  | 4 Byte            |      | 非精确数值，不建议用                                                                                           |
+| 数值     | 非精确数值 | 小数     | double[(M,D)]  | 8 Byte            |      | 非精确数值，不建议用， double precision/real是别名                                                             |
+| 数值     | 精确数值   | 小数     |                |                   |      |                                                                                                                |
+| 数值     | 精确数值   | 小数     |                |                   |      |                                                                                                                |
+| 日期时间 | 日期       |          |                |                   |      |                                                                                                                |
+| 日期时间 |            |          |                |                   |      |                                                                                                                |
+| 日期时间 |            |          |                |                   |      |                                                                                                                |
+| 日期时间 |            |          |                |                   |      |                                                                                                                |
+| 字符串   |            |          |                |                   |      |                                                                                                                |
+| 字符串   |            |          |                |                   |      |                                                                                                                |
+| 字符串   |            |          |                |                   |      |                                                                                                                |
+| JSON     |            |          |                |                   |      |                                                                                                                |
+** TODO 装修窗户通风参考
+:PROPERTIES:
+:EXPORT_FILE_NAME: 装修窗户通风参考
+:END:
+
+- 开窗位置、面积需要设计，付费咨询 https://zhuanlan.zhihu.com/p/350731079
+- 窗户类型要选择合适的，平开、内开、推拉各有特点，需要合理使用
+
+** TODO maven
+:PROPERTIES:
+:EXPORT_FILE_NAME: maven
+:SLUG: maven
+:RELEASE_DATE: 20260623
+:END:
+
+以前开发的基本都是Muitl-repo（代码库 : 项目 = 1 :  1），每一个项目都有一个仓库，并且都工作在后端项目上，只管把项目jar包打出来就行了。现在运行的个人网站项目是Mono-repo，前后端代码在同一个代码库中，需要同时打包前端和后端，把前端的产物也扔进jar包中，多出来了插件处理前端部分的内容，这里重新记录下maven的相关概念。
+
+#+BEGIN_SRC xml
+            <!-- 前端依赖安装和产物编译 exec-maven-plugin用来执行命令-->
+            <plugin>
+                <groupId>org.codehaus.mojo</groupId>
+                <artifactId>exec-maven-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <id>npm-install</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>npm</executable>
+                            <arguments>
+                                <argument> install </argument>
+                                <workingDirectory>${project.basedir}/../frontend</workingDirectory>
+                            </arguments>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>npm-build</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>exec</goal>
+                        </goals>
+                        <configuration>
+                            <executable>npm</executable>
+                            <arguments>
+                                <argument>run</argument>
+                                <argument>build</argument>
+                            </arguments>
+                            <workingDirectory>${project.basedir}/../frontend</workingDirectory>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+
+            <!-- 把前端编译的产物复制到后端目录 target/classes/static，打包的时候一起打包到jar maven-resource-plugin用于操作资源文件 -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-resources-plugin</artifactId>
+                <version>3.4.0</version>
+                <executions>
+                    <execution>
+                        <id>copy-frontend</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal> copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>${project.build.outputDirectory}/static</outputDirectory>
+                            <overwrite>true</overwrite>
+                            <resources>
+                                <resource>
+                                    <directory>${project.basedir}/../frontend/dist</directory>
+                                    <filtering>false</filtering>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+#+END_SRC
+*** maven生命周期
+参考资料
+- [[https://maven.apache.org/ref/3.9.16/maven-core/lifecycles.html][maven生命周期-default/clean/site]]
+#+BEGIN_SRC xml
+  <!-- default生命周期，这些phase的名称基本可以见名知意-->
+   <phases>
+   	<phase>validate</phase>
+   	<phase>initialize</phase>
+   	<phase>generate-sources</phase>
+   	<phase>process-sources</phase>
+   	<phase>generate-resources</phase>
+   	<phase>process-resources</phase>
+   	<phase>compile</phase>
+   	<phase>process-classes</phase>
+   	<phase>generate-test-sources</phase>
+   	<phase>process-test-sources</phase>
+   	<phase>generate-test-resources</phase>
+   	<phase>process-test-resources</phase>
+   	<phase>test-compile</phase>
+   	<phase>process-test-classes</phase>
+   	<phase>test</phase>
+   	<phase>prepare-package</phase>
+   	<phase>package</phase>
+   	<phase>pre-integration-test</phase>
+   	<phase>integration-test</phase>
+   	<phase>post-integration-test</phase>
+   	<phase>verify</phase>
+   	<phase>install</phase>
+   	<phase>deploy</phase>
+   </phases>
+   <!-- clean生命周期 -->
+   <phases>
+   	<phase>pre-clean</phase>
+   	<phase>clean</phase> <!-- clean默认绑定了maven-clen-plugin的clean goal-->
+   	<phase>post-clean</phase>
+   </phases>
+   <!-- site生命周期 -->
+   <phases>
+   	<phase>pre-site</phase>
+   	<phase>site</phase> <!-- site默认绑定maven-site-plugin:site-->
+   	<phase>post-site</phase> 			
+   	<phase>site-deploy</phase> <!-- post-site 默认绑定maven-site-plugin:deploy-->
+   </phases>
+
+#+END_SRC
+
+*** maven插件
+maven插件是对maven能力的扩展，插件的artifactId命名遵循约定规范，maven官方团队开发的插件命名为 `maven-xx-plugin`，而其他组织开发的插件为 `xx-maven-plugin`，以下是常用的插件信息
+| groupId                  | artifactId               | 开发团队 | 用途                                                                                                                                                                         |
+| org.apache.maven.plugins | maven-compiler-plugin    | maven    | 控制Java编译行为，常用于配置注解处理器（Lombok和MapStruct），以及指定Java版本，编译参数等                                                                                    |
+| org.apache.maven.plugins | maven-resources-plugin   | maven    | 处理src/main/resources/下的内容，做配置文件值替换，把其他资源文件拷贝到指定目录等                                                                                            |
+| org.apache.maven.plugins | maven-surefire-plugin    | maven    | 控制单元测试的执行，跳过测试(-DskipTests)，指定运行测试类、配置并行测试并生成测试报告                                                                                        |
+| org.apache.maven.plugins | maven-jar-plugin         | maven    | 打普通jar包，控制MANIFEST.MF内容（主类，classpath等），spring-boot项目使用spring-boot-maven-plugin来打包                                                                     |
+| org.apache.maven.plugins | maven-dependency-plugin  | maven    | 操作依赖，产用于复制依赖到某个目录，分析哪些依赖没有被使用，查看依赖树用于排查冲突等                                                                                         |
+| org.codehaus.mojo        | exec-maven-plugin        | MojoHaus | 在构建过程中执行外部命令或Java主类，常用于调用npm/yarn前端构建，执行数据库迁移脚本，运行代码生成工具                                                                         |
+| org.springframework.boot | spring-boot-maven-plugin | Spring   | SpringBoot项目专用，最核心的用途是把项目打成可直接运行的fat jar（含所有依赖），没有这个插件打出来的jar缺少依赖，启动运行报错。另一个场景是mvn spring-boot:run 在本地运行项目 |
+
+有这么多插件，我怎么知道有哪些可用选项呢？好在各个插件都自带help，以及有一个专门的help插件来详细解释插件用途
+#+BEGIN_SRC bash
+# 使用插件自带的help，-D选项是可选的，插件前缀就是artifactId里面的除了maven plugin字样之外的部分
+mvn 插件前缀:help -Ddetail=true -Dgoal=goal名称
+
+# 示例，以exec为例，它的goal少，输出内容不多
+➜  backend git:(main) ✗ mvn exec:help                    
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------------< com.jsy:site >----------------------------
+[INFO] Building jsy-site 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- exec:3.1.0:help (default-cli) @ site ---
+[INFO] Exec Maven Plugin 3.1.0
+  A plugin to allow execution of system and Java programs
+
+This plugin has 3 goals:
+
+exec:exec
+  A Plugin for executing external programs.
+
+exec:help
+  Display help information on exec-maven-plugin.
+  Call mvn exec:help -Ddetail=true -Dgoal=<goal-name> to display parameter
+  details.
+
+exec:java
+  Executes the supplied java class in the current VM with the enclosing
+  project's dependencies as classpath.
+
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.208 s
+[INFO] Finished at: 2026-06-30T09:39:29+08:00
+[INFO] ------------------------------------------------------------------------
+#+END_SRC
+
+
+#+BEGIN_SRC bash
+# 使用专门的help插件 -Dplugin指定你想要查看的插件
+mvn help:describe -Dplugin=exec -Ddetail=true
+
+#示例
+➜  backend git:(main) ✗ mvn help:describe -Dplugin=exec
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] ----------------------------< com.jsy:site >----------------------------
+[INFO] Building jsy-site 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] --- help:3.4.0:describe (default-cli) @ site ---
+[INFO] org.codehaus.mojo:exec-maven-plugin:3.1.0
+
+Name: Exec Maven Plugin
+Description: A plugin to allow execution of system and Java programs
+Group Id: org.codehaus.mojo
+Artifact Id: exec-maven-plugin
+Version: 3.1.0
+Goal Prefix: exec
+
+This plugin has 3 goals:
+
+exec:exec
+  Description: A Plugin for executing external programs.
+
+exec:help
+  Description: Display help information on exec-maven-plugin.
+    Call mvn exec:help -Ddetail=true -Dgoal=<goal-name> to display parameter
+    details.
+
+exec:java
+  Description: Executes the supplied java class in the current VM with the
+    enclosing project's dependencies as classpath.
+
+For more information, run 'mvn help:describe [...] -Ddetail'
+
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  0.401 s
+[INFO] Finished at: 2026-06-30T09:41:25+08:00
+[INFO] ------------------------------------------------------------------------
+#+END_SRC
