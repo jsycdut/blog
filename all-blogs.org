@@ -1684,4 +1684,65 @@ Host 你的服务器别名，你直接通过 ssh 别名 的形式 就可以连�
        \-+= 81561 pg ssh v0
          \--- 81562 pg nc -X 5 -x 127.0.0.1:9998 p0.q0.r0.s0
 #+END_SRC
+** TODO lsof看到的奇怪的http、distinct32是什么
+:PROPERTIES:
+:EXPORT_FILE_NAME: lsof看到的奇怪的http-distinct32是什么
+:SLUG: strange-identifiers-in-lsof
+:RELEASE_DATE: 20260611
+:END:
 
+lsof(lis open files)是一个很好的查看端口进程的工具，我一般用它查看有哪些进程连接到了我的目标端口，比如我有一个代理，我想知道哪些进程使用了我的代理，或者哪些进程在访问我的8080端口，很简单我们只需 ~lsof -i :目标端口~ 即可，如下
+
+#+BEING_SRC bash
+➜  scripts lsof -i :80
+COMMAND PID USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+nginx   794   pg    8u  IPv4 0xddfa2d8a83ab8821      0t0  TCP *:http (LISTEN)
+nginx   964   pg    8u  IPv4 0xddfa2d8a83ab8821      0t0  TCP *:http (LISTEN)
+➜  scripts lsof -i :443
+COMMAND     PID USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+firefox    2268   pg   17u  IPv4 0xddfa2d8a83aafca1      0t0  TCP pgdemacbook-pro:63831->hn.kd.jz.adsl:https (ESTABLISHED)
+firefox    2268   pg   33u  IPv4 0xddfa2d8a84c4f7a1      0t0  TCP pgdemacbook-pro:51238->116.169.142.35:https (ESTABLISHED)
+➜  scripts lsof -i :8080
+COMMAND   PID USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+java    99923   pg   93u  IPv6 0xddfa2d85b719ab51      0t0  TCP *:http-alt (LISTEN)
+➜  scripts lsof -i :9998
+COMMAND     PID USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+Google    13122   pg   28u  IPv4 0xddfa2d8a83aacea1      0t0  TCP localhost:54091->localhost:distinct32 (ESTABLISHED)
+Google    13122   pg   31u  IPv4 0xddfa2d8a84740ea1      0t0  TCP localhost:51134->localhost:distinct32 (ESTABLISHED)
+nc        81562   pg    3u  IPv4 0xddfa2d8a84c553a1      0t0  TCP localhost:50592->localhost:distinct32 (ESTABLISHED)
+
+#+END_SRC
+
+我们这里面看到了奇奇怪怪的 http，https，http-alt，distinct32，并没有看到我们的数字端口，其实这是lsof给出的贴心的端口到常用服务名的翻译，所谓的well known port numbers，即知名端口，比如80一般被用作http，443用于https，但是对于http-alt和distinct32明显就有点子陌生了，所以对我而言，还是希望直接展示端口好些， ~-P~ 选项可以做到
+
+#+BEING_SRC bash
+➜  scripts lsof -i :443 -P
+COMMAND     PID USER   FD   TYPE             DEVICE SIZE/OFF NODE NAME
+firefox    2268   pg   17u  IPv4 0xddfa2d8a83aafca1      0t0  TCP pgdemacbook-pro:63831->hn.kd.jz.adsl:443 (ESTABLISHED)
+firefox    2268   pg   33u  IPv4 0xddfa2d8a83aac321      0t0  TCP pgdemacbook-pro:51245->116.169.142.35:443 (ESTABLISHED)
+#+END_SRC
+
+那么，这些端口到服务名的映射在哪里呢？答案是 ~/etc/services~ ，截取部分内容如下
+#+BEING_SRC bash
+# WELL KNOWN PORT NUMBERS
+#
+rtmp              1/ddp    #Routing Table Maintenance Protocol
+tcpmux            1/udp     # TCP Port Service Multiplexer
+tcpmux            1/tcp     # TCP Port Service Multiplexer
+#                          Mark Lottor <MKL@nisc.sri.com>
+nbp               2/ddp    #Name Binding Protocol
+compressnet       2/udp     # Management Utility
+compressnet       2/tcp     # Management Utility
+compressnet       3/udp     # Compression Process
+compressnet       3/tcp     # Compression Process
+
+ssh              22/udp     # SSH Remote Login Protocol
+ssh              22/tcp     # SSH Remote Login Protocol
+
+domain           53/udp     # Domain Name Server
+domain           53/tcp     # Domain Name Server
+
+http             80/udp     www www-http # World Wide Web HTTP
+http             80/tcp     www www-http # World Wide Web HTTP
+.....
+#+END_SRC
