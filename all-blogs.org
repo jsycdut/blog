@@ -1637,7 +1637,7 @@ For more information, run 'mvn help:describe [...] -Ddetail'
 :PROPERTIES:
 :EXPORT_FILE_NAME: 如果你想要ssh走代理
 :SLUG: ssh-over-proxy
-:RELEASE_DATE: 2026-06-18
+:RELEASE_DATE: 20260618
 :END:
 
 有的时候我们需要一台或者多台海外服务器，并通过ssh连接过去运维，ssh是一个有明显报文特征的协议，加上目标ip位置，被防火墙锁定也不是稀奇的事情，所以给ssh走一下代理是有必要的，可以通过 ~.ssh/config~ 进行配置
