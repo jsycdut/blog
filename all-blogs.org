@@ -1633,3 +1633,55 @@ For more information, run 'mvn help:describe [...] -Ddetail'
 [INFO] Finished at: 2026-06-30T09:41:25+08:00
 [INFO] ------------------------------------------------------------------------
 #+END_SRC
+** TODO 如果你想要ssh走代理
+:PROPERTIES:
+:EXPORT_FILE_NAME: 如果你想要ssh走代理
+:SLUG: ssh-over-proxy
+:RELEASE_DATE: 2026-06-18
+:END:
+
+有的时候我们需要一台或者多台海外服务器，并通过ssh连接过去运维，ssh是一个有明显报文特征的协议，加上目标ip位置，被防火墙锁定也不是稀奇的事情，所以给ssh走一下代理是有必要的，可以通过 ~.ssh/config~ 进行配置
+
+#+BEGIN_SRC bash
+Host v0
+        HostName p0.q0.r0.s0
+        User root
+        Port 22
+        ProxyCommand nc -X 5 -x 127.0.0.1:9998 %h %p
+Host v1
+        HostName p1.q1.r1.s1
+        User root
+        Port 22
+        ProxyCommand nc -X 5 -x 127.0.0.1:9998 %h %p
+Host v2
+        HostName p2.q2.r2.s2
+        User jsy
+        Port 22
+        ProxyCommand nc -X 5 -x 127.0.0.1:9998 %h %p
+#+END_SRC
+
+
+其遵循的格式大致是
+#+BEGIN_SRC bash
+Host 你的服务器别名，你直接通过 ssh 别名 的形式 就可以连接到此处下方HostName对应的机器了
+  HostName 服务器的真实IP地址或域名
+  User 登录用户名
+  Port 端口号（如果不是默认的22）
+  IdentityFile 本地私钥文件的路径（用于免密登录），一般默认在 .ssh/id_rsa
+  ProxyCommand 代理中转命令（如SOCKS5配置），比如我配置的就是走本地的9998端口的sock5协议
+#+END_SRC
+
+那么有一个问题，如上配置，我通过终端 ~ssh v0~ 连接到我的p0.q0.r0.s0服务器之后，我怎么知道这个ssh连接是走的代理过去的呢？这是一个很有意思的问题，想了想大概有以下方法可以验证
+1. 服务器端，执行 ~who~ ，这会列出登录的用户列表及其ip，查看该ip是否为代理服务器，是的话就走了代理
+2. 客户端，检查端口以及相关进程，按我配置了ssh通过nc走9998端口的代理，那么必定在连接到9998端口的进程列表里面有nc，并且这个nc一定有一个父进程是ssh且它连接的目标服务器就是v0对应的p0.q0.r0.s0，这里可以通过lsof和pstree来进行查看
+#+BEGIN_SRC bash
+  ➜  scripts lsof -i :9998 -P  | grep "nc " # -P 选项关闭掉lsof贴心的端口服务名转译功能，直接提供端口号，比如9998会被翻译成distinct32，看起来是一脸懵逼
+  nc        81562（这是nc的pid）   pg    3u  IPv4 0xddfa2d8a84c553a1      0t0  TCP localhost:50592->localhost:9998 (ESTABLISHED)
+  ➜  scripts pstree -p 81562
+  -+= 00001 root /sbin/launchd
+   \-+= 05291 pg tmux new -s work
+     \-+= 71946 pg -zsh
+       \-+= 81561 pg ssh v0
+         \--- 81562 pg nc -X 5 -x 127.0.0.1:9998 p0.q0.r0.s0
+#+END_SRC
+
