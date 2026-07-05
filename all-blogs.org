@@ -1746,3 +1746,693 @@ http             80/udp     www www-http # World Wide Web HTTP
 http             80/tcp     www www-http # World Wide Web HTTP
 .....
 #+END_SRC
+** TODO 你在用Openclaw做什么
+:PROPERTIES:
+:EXPORT_FILE_NAME: 你在用openclaw做什么
+:SLUG: openclaw-journey
+:RELEASE_DATE: 20260608
+:END:
+
+- [[https://openclaw.ai/][openclaw官网]]
+- [[https://www.nxcode.io/zh/resources/news/openclaw-complete-guide-2026][openclaw时间线]]
+大概在202603的时候，openclaw在我们的互联网上就开始全面爆火了起来，网上铺天盖地都是养龙虾热潮，出现了卖龙虾课、封装好的龙虾服务甚至帮人安装龙虾的，在更早的时候打着相关旗号的 ~$CLAWD~ 代币1600万美元的虚拟币市值也是让人觉得这个世界好像疯了一样。
+
+如果让我把自己的电脑全权交给openclaw，我是不放心的，因为里面有我重要的数据文件，一旦被openclaw搞坏，就难受了，但是如果是没有核心数据资产的虚拟机或者vps实例，那么搞烂了其实问题也不大，重装系统又可以重新来过，安装openclaw的流程大概如下，直接去openclaw官网，它们写了安装脚本，拿来执行即可，openclaw的安装大概是涉及到以下内容
+1. 安装openclaw组件
+2. 配置后台运行模型
+3. 开启对话，识别你的身份，设定openclaw的角色
+4. 配置聊天工具，如微信，telegram使得你可以通过这些媒介和openclaw进行对话
+
+下面记录了我在VPS上面的的openclaw安装流程，此VPS配置可谓是相当普通（花费1年10$），1核、1G内存、10GB磁盘，但是安装和运行openclaw没什么问题，能够让我跑通整个流程。中间碰到任何不理解的问题，比较快速的解决方案是找一个至少看起来还不错的LLM咨询下，或者看看其他openclaw的安装博客，就我安装过程中，除了anthropic没搞到api key，转头去了DeepSeek之外，基本没碰到什么卡点。
+#+BEGIN_SRC bash
+  # 执行安装脚本
+  root@dedirock-58662919:~# curl -fsSL https://openclaw.ai/install.sh | bash
+  Preparing installer interface...
+
+    🦞 OpenClaw Installer
+    I read logs so you can keep pretending you don't have to.
+
+  ✓ Detected: linux
+
+  Install plan
+  OS: linux
+  Install method: npm
+  Requested version: latest
+
+  [1/3] Preparing environment
+  ✓ Node.js v24.16.0 found
+  · Active Node.js: v24.16.0 (/root/.nvm/versions/node/v24.16.0/bin/node)
+  · Active npm: 11.13.0 (/root/.nvm/versions/node/v24.16.0/bin/npm)
+  · Using Node.js runtime at /root/.nvm/versions/node/v24.16.0/bin/node
+  · Using Node.js runtime at /root/.nvm/versions/node/v24.16.0/bin/node
+
+  [2/3] Installing OpenClaw
+  ✓ Git already installed
+  · Installing OpenClaw v2026.6.11
+  · Installing OpenClaw package
+  ✓ OpenClaw npm package installed
+  ✓ OpenClaw installed
+
+  [3/3] Finalizing setup
+  Warning: timed out during installer finalization probe: openclaw daemon status --json
+
+  🦞 OpenClaw installed successfully (2026.6.11)!
+  Installation complete. Your productivity is about to get weird.
+
+  · Starting setup
+
+  │
+  ◇
+
+  OpenClaw 2026.6.11 (e085fa1) — Your personal assistant, minus the passive-aggressive calendar reminders.
+
+  ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+  ██░▄▄▄░██░▄▄░██░▄▄▄██░▀██░██░▄▄▀██░████░▄▄▀██░███░██
+  ██░███░██░▀▀░██░▄▄▄██░█░█░██░█████░████░▀▀░██░█░█░██
+  ██░▀▀▀░██░█████░▀▀▀██░██▄░██░▀▀▄██░▀▀░█░██░██▄▀▄▀▄██
+  ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+                         OPENCLAW
+
+  ┌  OpenClaw setup
+  │
+  ◇  Security disclaimer ──────────────────────────────────────────────────────────────────────╮
+  │                                                                                            │
+  │  OpenClaw is a hobby project and still in beta. Expect sharp edges.                        │
+  │  By default, OpenClaw is a personal agent: one trusted operator boundary.                  │
+  │  This bot can read files and run actions if tools are enabled.                             │
+  │  A bad prompt can trick it into doing unsafe things.                                       │
+  │                                                                                            │
+  │  OpenClaw is not a hostile multi-tenant boundary by default.                               │
+  │  If multiple users can message one tool-enabled agent, they share that delegated tool      │
+  │  authority.                                                                                │
+  │                                                                                            │
+  │  If you're not comfortable with security hardening and access control, don't run           │
+  │  OpenClaw.                                                                                 │
+  │  Ask someone experienced to help before enabling tools or exposing it to the internet.     │
+  │                                                                                            │
+  │  Recommended baseline                                                                      │
+  │  - Pairing/allowlists + mention gating.                                                    │
+  │  - Multi-user/shared inbox: split trust boundaries (separate gateway/credentials, ideally  │
+  │    separate OS users/hosts).                                                               │
+  │  - Sandbox + least-privilege tools.                                                        │
+  │  - Shared inboxes: isolate DM sessions (session.dmScope: per-channel-peer) and keep tool   │                                                               [85/1602]
+  │    access minimal.                                                                         │
+  │  - Keep secrets out of the agent's reachable filesystem.                                   │
+  │  - Use the strongest available model for any bot with tools or untrusted inboxes.          │
+  │                                                                                            │
+  │  Run regularly                                                                             │
+  │  openclaw security audit --deep                                                            │
+  │  openclaw security audit --fix                                                             │
+  │                                                                                            │
+  │  Learn more                                                                                │
+  │  - https://docs.openclaw.ai/gateway/security                                               │
+  │                                                                                            │
+  ├────────────────────────────────────────────────────────────────────────────────────────────╯
+  │
+  ◇  I understand this is personal-by-default and shared/multi-user use requires lock-down. Continue?
+  │  Yes
+  │
+  ◇  Setup mode
+  │  QuickStart (recommended)
+  │
+  ◇  QuickStart ─────────────────────────╮
+  │                                      │
+  │  Gateway port: 18789                 │
+  │  Gateway bind: Loopback (127.0.0.1)  │
+  │  Gateway auth: Token (default)       │
+  │  Tailscale exposure: Off             │
+  │  Direct to chat channels.            │
+  │                                      │
+  ├──────────────────────────────────────╯
+  │
+  ◇  Model/auth provider
+  │  Anthropic
+  │
+  ◇  Anthropic auth method
+  │  Back
+  │
+  ◇  Model/auth provider
+  │  Skip for now
+  │
+  ◇  Default model
+  │  Keep current (default: openai/gpt-5.5)
+  │
+  ◇  Model check ─────────────────────────────────────────────────────────────────────────────╮
+  │                                                                                           │
+  │  No auth configured for provider "openai". The agent may fail until credentials are       │
+  │  added. Run `openclaw models auth login --provider openai`, `openclaw configure`, or set  │
+  │  an API key env var.                                                                      │
+  │                                                                                           │
+  ├───────────────────────────────────────────────────────────────────────────────────────────╯
+  │
+  ◇  How channels work ───────────────────────────────────────────────────────────────────────╮
+  │                                                                                           │
+  │  Inbound DM safety defaults to pairing: unknown senders get a pairing code first.         │
+  │  Approve with: openclaw pairing approve <channel> <code>                                  │
+  │  Open/public DMs require dmPolicy="open" plus allowFrom=["*"].                            │
+  │  For multi-user DMs, isolate sessions with: openclaw config set session.dmScope           │
+  │  "per-channel-peer" (or "per-account-channel-peer" for multi-account channels).           │
+  │  Docs: channels/pairing                                                                   │
+  │                                                                                           │
+  │  Feishu: 飞书/Lark enterprise messaging with doc/wiki/drive tools.                        │
+  │  Google Chat: Google Workspace Chat app with HTTP webhook.                                │
+  │  Nostr: Decentralized protocol; encrypted DMs via NIP-04.                                 │
+  │  Microsoft Teams: Teams SDK; enterprise support.                                          │
+  │  Mattermost: self-hosted Slack-style chat; install the plugin to enable.                  │
+  │  Nextcloud Talk: Self-hosted chat via Nextcloud Talk webhook bots.                        │
+  │  Matrix: open protocol; install the plugin to enable.                                     │
+  │  Raft: Raft CLI wake bridge for human and agent collaboration.                            │
+  │  LINE: LINE Messaging API webhook bot.                                                    │
+  │  Zalo: Vietnam-focused messaging platform with Bot API.                                   │
+  │  ClickClack: self-hosted chat via first-class ClickClack bot tokens.                      │
+  │  Zalo Personal: Zalo personal account via QR code login.                                  │
+  │  SMS: Twilio-backed SMS with inbound webhooks and outbound replies.                       │
+  │  Synology Chat: Connect your Synology NAS Chat to OpenClaw with full agent capabilities.  │
+  │  Tlon: decentralized messaging on Urbit; install the plugin to enable.                    │
+  │  Discord: very well supported right now.                                                  │
+  │  iMessage: Local iMessage/SMS through the imsg bridge, including private API message      │
+  │  actions when enabled.                                                                    │
+  │  IRC: classic IRC networks with DM/channel routing and pairing controls.                  │
+  │  QQ Bot: connect to QQ via official QQ Bot API with group chat and direct message         │
+  │  support.                                                                                 │
+  │  Signal: signal-cli linked device with extra setup for the local REST bridge.             │
+  │  Slack: supported (Socket Mode).                                                          │
+  │  Telegram: simplest way to get started — register a bot with @BotFather and get going.    │
+  │  Twitch: Twitch chat integration                                                          │
+  │  WhatsApp: works with your own number; recommend a separate phone + eSIM.                 │
+  │  WeCom: Enterprise messaging and documents, scheduling, task tools.                       │
+  │  Weixin: Personal WeChat messaging via QR-code login.                                     │
+  │  Zalo ClawBot: Personal Zalo assistant bot via QR-code login — owner-bound, no setup.     │
+  │  Yuanbao: Tencent Yuanbao AI assistant conversation channel.                              │
+  │                                                                                           │
+  ├───────────────────────────────────────────────────────────────────────────────────────────╯
+  │
+  ◆  Select channel (QuickStart)
+  │
+  │  Search:
+  │  ○ ClickClack
+  │  ○ Discord (Bot API)
+  │  ○ Feishu/Lark (飞书)
+  │  ● Google Chat (Chat API) (download from @openclaw/googlechat)
+  │  ○ iMessage (imsg)
+  │  ○ IRC (Server + Nick)
+  │  ○ LINE (Messaging API)
+  │  ○ Matrix (plugin)
+  │  ○ Mattermost (plugin)
+  │  ○ Microsoft Teams (Teams SDK)
+  │  ○ Nextcloud Talk (self-hosted)
+  │  ○ Nostr (NIP-04 DMs)
+  │  ○ QQ Bot (Official API)
+  │  ○ Raft (CLI wake bridge)
+  │  ○ Signal (signal-cli)
+  │  ○ Slack (Socket Mode)
+  │  ○ SMS (Twilio)
+  │  ○ Synology Chat (Webhook)
+  │  ○ Telegram (Bot API)
+  │  ○ Tlon (Urbit)
+  │  ○ Twitch (Chat)
+  │  ○ WeCom（企业微信）
+  │  ○ Weixin（微信）
+  │  ○ WhatsApp (QR link)
+  │  ○ Yuanbao (元宝)
+  │  ○ Zalo (Bot API)
+  │  ○ Zalo (Personal Account)
+  │  ○ Zalo ClawBot (QR)
+  │  ○ Skip for now
+  │  ↑/↓ to select • Enter: confirm • Type: to search
+  └
+  ◇  Telegram bot token ────────────────────────────────────╮                                                                                                  [25/1637]
+  │                                                         │
+  │  1) Open Telegram and chat with @BotFather              │
+  │  2) Run /newbot (or /mybots)                            │
+  │  3) Copy the token (looks like 123456:ABC...)           │
+  │  Tip: you can also set TELEGRAM_BOT_TOKEN in your env.  │
+  │  Docs: https://docs.openclaw.ai/telegram                │
+  │  Website: https://openclaw.ai                           │
+  │                                                         │
+  ├─────────────────────────────────────────────────────────╯
+  │
+  ◇  How do you want to provide this Telegram bot token?
+  │  Enter Telegram bot token
+  │
+  ◇  Enter Telegram bot token
+  │  8943764137:AAFFniFaIXCaK1Mc73BNb5KXcZdfSInJalA
+  │
+  ◇  Telegram DM access warning ───────────────────────────────────────────╮
+  │                                                                        │
+  │  Your bot is using DM policy: pairing.                                 │
+  │  Any Telegram user who discovers the bot can send pairing requests.    │
+  │  For private use, configure an allowlist with your Telegram user id:   │
+  │    openclaw config set channels.telegram.dmPolicy "allowlist"          │
+  │    openclaw config set channels.telegram.allowFrom '["YOUR_USER_ID"]'  │
+  │  Docs: channels/pairing                                                │
+  │                                                                        │
+  ├────────────────────────────────────────────────────────────────────────╯
+  │
+  ◇  Selected channels ──────────────────────────────────────────────────────────────────────╮
+  │                                                                                          │
+  │  Telegram — simplest way to get started — register a bot with @BotFather and get going.  │
+  │  https://docs.openclaw.ai/channels/telegram https://openclaw.ai                          │
+  │                                                                                          │
+  ├──────────────────────────────────────────────────────────────────────────────────────────╯
+  Updated config: ~/.openclaw/openclaw.json
+  Workspace OK: ~/.openclaw/workspace
+  Sessions OK: ~/.openclaw/agents/main/sessions
+  │
+  ◇  Web search ─────────────────────────────────────────────────────────────────╮
+  │                                                                              │
+  │  Web search lets your agent look things up online.                           │
+  ├──────────────────────────────────────────────────────────────────────────────╯
+  │
+  ◇  Search provider
+  │  DuckDuckGo Search (experimental)
+  │
+  ◇  Web search ──────────────────────────────────────────────────────────────╮
+  │                                                                           │
+  │  DuckDuckGo Search (experimental) works without an API key.               │
+  │  OpenClaw will enable the plugin and use it as your web_search provider.  │
+  │  Docs: https://docs.openclaw.ai/tools/web                                 │
+  │                                                                           │
+  ├───────────────────────────────────────────────────────────────────────────╯
+  │
+  ◇  Skills status ─────────────╮
+  │                             │
+  │  Eligible: 16               │
+  │  Missing requirements: 31   │
+  │  Unsupported on this OS: 7  │
+  │  Blocked by allowlist: 0    │
+  │                             │
+  ├─────────────────────────────╯
+  │
+  ◆  Configure skills now? (recommended)
+  │  ● Yes / ○ No
+  ◇  Install missing skill dependencies
+  │  📰 blogwatcher, ✨ gemini, 🧩 gh-issues, 🧲 gifgrep, 🐙 github, 📍 goplaces, 📄 nano-pdf
+  │
+  ◇  Homebrew recommended ──────────────────────────────────────────────────────────╮
+  │                                                                                 │
+  │  Many skill dependencies are shipped via Homebrew.                              │
+  │  Without brew, you'll need to build from source or download releases manually.  │
+  │                                                                                 │
+  ├─────────────────────────────────────────────────────────────────────────────────╯
+  │
+  ◇  Show Homebrew install command?
+  │  Yes
+  │
+  ◇  Homebrew install ─────────────────────────────────────────────────────╮
+  │                                                                        │
+  │  Run:                                                                  │
+  │  /bin/bash -c "$(curl -fsSL                                            │
+  │  https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"  │
+  │                                                                        │
+  ├────────────────────────────────────────────────────────────────────────╯
+  │
+  ◇  Enable hooks?
+  │  🚀 boot-md, 📎 bootstrap-extra-files, 📝 command-logger, 🧹 compaction-notifier, 💾 session-memory
+  │
+  ◇  Hooks Configured ──────────────────────────────────────────────────────────────────────╮
+  │                                                                                         │
+  │  Enabled 5 hooks: boot-md, bootstrap-extra-files, command-logger, compaction-notifier,  │
+  │  session-memory                                                                         │
+  │                                                                                         │
+  │  You can manage hooks later with:                                                       │
+  │    openclaw hooks list                                                                  │
+  │    openclaw hooks enable <name>                                                         │
+  │    openclaw hooks disable <name>                                                        │
+  │                                                                                         │
+  ├─────────────────────────────────────────────────────────────────────────────────────────╯
+  │
+  ◇  Systemd ────────────────────────────────────────────────────────────────────────────────╮
+  │                                                                                          │
+  │  Linux installs use a systemd user service by default. Without lingering, systemd stops  │
+  │  the user session on logout/idle and kills the Gateway.                                  │
+  │  Enabling lingering now (may require sudo; writes /var/lib/systemd/linger).              │
+  │                                                                                          │
+  ├──────────────────────────────────────────────────────────────────────────────────────────╯
+  │
+  ◇  Systemd ─────────────────────────────╮
+  │                                       │
+  │  Enabled systemd lingering for root.  │
+  │                                       │
+  ├───────────────────────────────────────╯
+  │
+  ◇  Gateway service runtime ────────────────────────────────────────────╮
+  │                                                                      │
+  │  QuickStart uses Node for the Gateway service (stable + supported).  │
+  │                                                                      │
+  ├──────────────────────────────────────────────────────────────────────╯
+  │
+  ◑  Installing Gateway service...
+  Installed systemd service: /root/.config/systemd/user/openclaw-gateway.service
+  ◇  Gateway service installed.
+  ◇  Health check help ────────────────────────────────╮
+  │                                                    │
+  │  Docs:                                             │
+  │  https://docs.openclaw.ai/gateway/health           │
+  │  https://docs.openclaw.ai/gateway/troubleshooting  │
+  │                                                    │
+  ├────────────────────────────────────────────────────╯
+  │
+  ◇  Optional apps ────────────────────────╮
+  │                                        │
+  │  Add nodes for extra features:         │
+  │  - macOS app (system + notifications)  │
+  │  - iOS app (camera/canvas)             │
+  │  - Android app (camera/canvas)         │
+  │                                        │
+  ├────────────────────────────────────────╯
+  │
+  ◇  Control UI ─────────────────────────────────────────────────────────────────────╮
+  │                                                                                  │
+  │  Web UI: http://127.0.0.1:18789/                                                 │
+  │  Web UI (with token):                                                            │
+  │  http://127.0.0.1:18789/#token=1440e55b3b34a9de592ff36dbbd65267791af04ba8b2be74  │
+  │  Gateway WS: ws://127.0.0.1:18789                                                │
+  │  Gateway: not detected (timeout)                                                 │
+  │  Docs: https://docs.openclaw.ai/web/control-ui                                   │
+  │                                                                                  │
+  ├──────────────────────────────────────────────────────────────────────────────────╯
+  │
+  ◇  Hatch your agent ───────────────────────────────────────────────────╮
+  │                                                                      │
+  │  Your workspace is ready.                                            │
+  │  The first Terminal chat run will send: "Wake up, my friend!"        │
+  │  Edit BOOTSTRAP.md later to change how the agent introduces itself.  │
+  │                                                                      │
+  ├──────────────────────────────────────────────────────────────────────╯
+  │
+  ◆  How do you want to hatch your agent?
+  │  ● Hatch in Terminal (recommended)
+  │  ○ Hatch later
+  ◇  How do you want to hatch your agent?
+  │  Hatch in Terminal (recommended)
+  │
+  ◇
+
+  OpenClaw 2026.6.11 (e085fa1) — Running on your hardware, reading your logs, judging nothing (mostly).
+
+  openclaw tui - local embedded - agent main - session main
+
+  session agent:main:main
+
+
+  Wake up, my friend!
+
+
+  auth or provider access failed for openai. Run /auth openai to refresh credentials; if you already re-authed, switch models/providers because this account may still
+  be blocked for inference.
+  local ready | error
+  agent main | session main | openai/gpt-5.5 | tokens ?/200k
+#+END_SRC
+
+
+#+BEGIN_SRC bash
+  #检查看看openclaw的安装有没有什么问题
+  root@dedirock-58662919:~# openclaw doctor
+  │
+  ◇
+
+  OpenClaw 2026.6.11 (e085fa1) — If something's on fire, I can't extinguish it—but I can write a beautiful postmortem.
+
+  ▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄▄
+  ██░▄▄▄░██░▄▄░██░▄▄▄██░▀██░██░▄▄▀██░████░▄▄▀██░███░██
+  ██░███░██░▀▀░██░▄▄▄██░█░█░██░█████░████░▀▀░██░█░█░██
+  ██░▀▀▀░██░█████░▀▀▀██░██▄░██░▀▀▄██░▀▀░█░██░██▄▀▄▀▄██
+  ▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀▀
+                         OPENCLAW
+
+  ┌  OpenClaw doctor
+  │
+  ◇  Update ──────────────────────────────────────────────────────────────────────────────────╮
+  │                                                                                           │
+  │  This install is not a git checkout.                                                      │
+  │  Run `openclaw update` to update via your package manager (npm/pnpm), then rerun doctor.  │
+  │                                                                                           │
+  ├───────────────────────────────────────────────────────────────────────────────────────────╯
+  │
+  ◇  Startup optimization ────────────────────────────────────────────────────────────────────╮
+  │                                                                                           │
+  │  - NODE_COMPILE_CACHE is not set; repeated CLI runs can be slower on small hosts          │
+  │    (Raspberry Pi/VM).                                                                     │
+  │  - OPENCLAW_NO_RESPAWN is not set to 1; set it when you want routine gateway restarts to  │
+  │    stay in-process instead of handing off to a managed supervisor.                        │
+  │  - Suggested env for low-power hosts:                                                     │
+  │    export NODE_COMPILE_CACHE=/var/tmp/openclaw-compile-cache                              │
+  │    mkdir -p /var/tmp/openclaw-compile-cache                                               │
+  │    export OPENCLAW_NO_RESPAWN=1                                                           │
+  │                                                                                           │
+  ├───────────────────────────────────────────────────────────────────────────────────────────╯
+  │
+  ◇  Doctor warnings ───────────────────────────────────────────────────────────────────────╮
+  │                                                                                         │
+  │  - Agent "main" is routed from channel "telegram", but the message tool is unavailable  │
+  │    for that agent; explicit channel actions such as sendAttachment, upload-file,        │
+  │    thread-reply, or reply can fail. Add "message" to the agent tool allowlist, add      │
+  │    "group:messaging", or switch the agent to a profile that includes messaging tools.   │
+  │                                                                                         │
+  ├─────────────────────────────────────────────────────────────────────────────────────────╯
+  │
+  ◇  Command owner ────────────────────────────────────────────────────────────────────────────╮
+  │                                                                                            │
+  │  No command owner is configured.                                                           │
+  │  A command owner is the human operator account allowed to run owner-only commands and      │
+  │  approve dangerous actions, including /diagnostics, /export-trajectory, /config, and exec  │
+  │  approvals.                                                                                │
+  │  DM pairing only lets someone talk to the bot; it does not make that sender the owner for  │
+  │  privileged commands.                                                                      │
+  │  Fix: set commands.ownerAllowFrom to your channel user id, for example openclaw config     │
+  │  set commands.ownerAllowFrom '["telegram:123456789"]'                                      │
+  │  Restart the gateway after changing this if it is already running.                         │
+  │                                                                                            │
+  ├────────────────────────────────────────────────────────────────────────────────────────────╯
+  │
+  ◇  State integrity ──────────────────────────────────────────────────────────────────────────╮
+  │                                                                                            │
+  │  - OAuth dir not present (~/.openclaw/credentials). Skipping create because no             │
+  │    WhatsApp/pairing channel config is active.                                              │
+  │  - 1/1 recent sessions are missing transcripts.                                            │
+  │    Verify sessions in store: openclaw sessions --store                                     │
+  │    "/root/.openclaw/agents/main/sessions/sessions.json"                                    │
+  │    Preview cleanup impact: openclaw sessions cleanup --store                               │
+  │    "/root/.openclaw/agents/main/sessions/sessions.json" --dry-run                          │
+  │    Prune missing entries: openclaw sessions cleanup --store                                │
+  │    "/root/.openclaw/agents/main/sessions/sessions.json" --enforce --fix-missing            │
+  │  - Main session transcript missing                                                         │
+  │    (~/.openclaw/agents/main/sessions/525228eb-70aa-43b0-94f7-dc1978767fb1.jsonl). History  │
+  │    will appear to reset.                                                                   │
+  │                                                                                            │
+  ├────────────────────────────────────────────────────────────────────────────────────────────╯
+  │
+  ◇  Gateway service config ───────────────────────────────────────────────────────────────╮
+  │                                                                                        │
+  │  - Gateway service uses Node from a version manager; it can break after upgrades.      │
+  │    (/root/.nvm/versions/node/v24.16.0/bin/node)                                        │
+  │  - System Node 22 LTS (22.19+) or Node 24 not found; install it before migrating away  │
+  │    from version managers.                                                              │
+  │                                                                                        │
+  ├────────────────────────────────────────────────────────────────────────────────────────╯
+  │
+  ◇  Update gateway service config to the recommended defaults now?
+  │  Yes
+
+  Installed systemd service: /root/.config/systemd/user/openclaw-gateway.service
+  Previous unit backed up to: /root/.config/systemd/user/openclaw-gateway.service.bak
+  │
+  ◇  Security ─────────────────────────────────────────────────────────────────────────────────╮
+  │                                                                                            │
+  │  - WARNING: openclaw.json contains plaintext secret-bearing config fields.                 │
+  │    Paths: gateway.auth.token                                                               │
+  │    Agents or workspace tools that can read config files may see these API keys/tokens.     │
+  │    Migrate them to SecretRefs with openclaw secrets configure or openclaw secrets apply,   │
+  │    then verify with openclaw secrets audit --check.                                        │
+  │  - Telegram DMs: locked (channels.telegram.dmPolicy="pairing") with no allowlist; unknown  │
+  │    senders will be blocked / get a pairing code.                                           │
+  │    Approve via: openclaw pairing list telegram / openclaw pairing approve telegram <code>  │
+  │  - Run: openclaw security audit --deep                                                     │
+  │                                                                                            │
+  ├────────────────────────────────────────────────────────────────────────────────────────────╯
+  │
+  ◇  Skills status ─────────────────────────────────────╮
+  │                                                     │
+  │  Eligible: 16                                       │
+  │  Missing requirements: 31                           │
+  │  Incompatible (platform mismatch, auto-skipped): 7  │
+  │  Blocked by allowlist: 0                            │
+  │                                                     │
+  ├─────────────────────────────────────────────────────╯
+  │
+  ◇  Plugins ──────╮
+  │                │
+  │  Loaded: 49    │
+  │  Imported: 0   │
+  │  Disabled: 15  │
+  │  Errors: 0     │
+  │                │
+  ├────────────────╯
+  │
+  ◇  Skills ─────────────────────────────────────────────────────────────────────────────╮
+  │                                                                                      │
+  │  Some skills are allowed for this agent but are not usable in the current runtime    │
+  │  environment.                                                                        │
+  │  - 1password: bins: op                                                               │
+  │    install option: Install 1Password CLI (brew)                                      │
+  │  - blogwatcher: bins: blogwatcher                                                    │
+  │    install option: Install blogwatcher (go)                                          │
+  │  - blucli: bins: blu                                                                 │
+  │    install option: Install blucli (go)                                               │
+  │  - camsnap: bins: camsnap                                                            │
+  │    install option: Install camsnap (brew)                                            │
+  │  - coding-agent: config: skills.entries.coding-agent.enabled                         │
+  │    install option: Install @anthropic-ai/claude-code (npm)                           │
+  │  - eightctl: bins: eightctl                                                          │
+  │    install option: Install eightctl (go)                                             │
+  │  - gemini: bins: gemini                                                              │
+  │    install option: Install Gemini CLI (brew)                                         │
+  │  - gh-issues: bins: gh                                                               │
+  │    install option: Install GitHub CLI (brew)                                         │
+  │  - gifgrep: bins: gifgrep                                                            │
+  │    install option: Install gifgrep (go)                                              │
+  │  - github: bins: gh                                                                  │
+  │    install option: Install GitHub CLI (brew)                                         │
+  │  - gog: bins: gog                                                                    │
+  │    install option: Install gog (brew)                                                │
+  │  - goplaces: bins: goplaces; env: GOOGLE_PLACES_API_KEY                              │
+  │    install option: Install goplaces (brew)                                           │
+  │  - himalaya: bins: himalaya                                                          │
+  │    install option: Install Himalaya (brew)                                           │
+  │  - mcporter: bins: mcporter                                                          │
+  │    install option: Install mcporter (npm)                                            │
+  │  - nano-pdf: bins: nano-pdf                                                          │
+  │    install option: Install nano-pdf (uv)                                             │
+  │  - obsidian: bins: obsidian                                                          │
+  │  - openai-whisper: bins: whisper                                                     │
+  │    install option: Install OpenAI Whisper (brew)                                     │
+  │  - openai-whisper-api: env: OPENAI_API_KEY                                           │
+  │    install option: Install curl (brew)                                               │
+  │  - openhue: bins: openhue                                                            │
+  │    install option: Install OpenHue CLI (brew)                                        │
+  │  - oracle: bins: oracle                                                              │
+  │    install option: Install @steipete/oracle (npm)                                    │
+  │  - ordercli: bins: ordercli                                                          │
+  │    install option: Install ordercli (go)                                             │
+  │  - sag: bins: sag; env: ELEVENLABS_API_KEY                                           │
+  │    install option: Install sag (brew)                                                │
+  │  - session-logs: bins: jq, rg                                                        │
+  │    install option: Install jq (brew)                                                 │
+  │  - sherpa-onnx-tts: env: SHERPA_ONNX_RUNTIME_DIR, SHERPA_ONNX_MODEL_DIR              │
+  │    install option: Download sherpa-onnx runtime (Linux x64)                          │
+  │    install option: Download Piper en_US lessac (high)                                │
+  │  - songsee: bins: songsee                                                            │
+  │    install option: Install songsee (brew)                                            │
+  │  - sonoscli: bins: sonos                                                             │
+  │    install option: Install sonoscli (go)                                             │
+  │  - spotify-player: any bins: spogo, spotify_player                                   │
+  │    install option: Install spogo (brew)                                              │
+  │  - summarize: bins: summarize                                                        │
+  │    install option: Install summarize (brew)                                          │
+  │  - trello: bins: jq; env: TRELLO_API_KEY, TRELLO_TOKEN                               │
+  │    install option: Install jq (brew)                                                 │
+  │  - video-frames: bins: ffmpeg                                                        │
+  │    install option: Install ffmpeg (brew)                                             │
+  │  - xurl: bins: xurl                                                                  │
+  │    install option: Install xurl (brew)                                               │
+  │  Disable unused skills: openclaw doctor --fix                                        │
+  │  Inspect details: openclaw skills check --agent <id> or openclaw skills info <name>  │
+  │  --agent <id>                                                                        │
+  │                                                                                      │
+  ├──────────────────────────────────────────────────────────────────────────────────────╯
+  │
+  ◇  Disable 31 unavailable skills in config?
+  │  Yes
+  │
+  ◇  Doctor changes ────────────────╮
+  │                                 │
+  │  - Disabled 1password           │
+  │  - Disabled blogwatcher         │
+  │  - Disabled blucli              │
+  │  - Disabled camsnap             │
+  │  - Disabled coding-agent        │
+  │  - Disabled eightctl            │
+  │  - Disabled gemini              │
+  │  - Disabled gh-issues           │
+  │  - Disabled gifgrep             │
+  │  - Disabled github              │
+  │  - Disabled gog                 │
+  │  - Disabled goplaces            │
+  │  - Disabled himalaya            │
+  │  - Disabled mcporter            │
+  │  - Disabled nano-pdf            │
+  │  - Disabled obsidian            │
+  │  - Disabled openai-whisper      │
+  │  - Disabled openai-whisper-api  │
+  │  - Disabled openhue             │
+  │  - Disabled oracle              │
+  │  - Disabled ordercli            │
+  │  - Disabled sag                 │
+  │  - Disabled session-logs        │
+  │  - Disabled sherpa-onnx-tts     │
+  │  - Disabled songsee             │
+  │  - Disabled sonoscli            │
+  │  - Disabled spotify-player      │
+  │  - Disabled summarize           │
+  │  - Disabled trello              │
+  │  - Disabled video-frames        │
+  │  - Disabled xurl                │
+  │                                 │
+  ├─────────────────────────────────╯
+  │
+  ◇  Enable bash shell completion for openclaw?
+  │  Yes
+  │
+  ◇  Shell completion ────────────────────────────────────────────────────────╮
+  │                                                                           │
+  │  Shell completion installed. Restart your shell or run: source ~/.bashrc  │
+  │                                                                           │
+  ├───────────────────────────────────────────────────────────────────────────╯
+  │
+  ◇  Memory search ────────────────────────────────────────────────────────────────╮
+  │                                                                                │
+  │  Memory search provider is set to "openai" but no API key was found.           │
+  │  Semantic recall will not work without a valid API key.                        │
+  │                                                                                │
+  │                                                                                │
+  │  Fix (pick one):                                                               │
+  │  - Set OPENAI_API_KEY in your environment                                      │
+  │  - Configure credentials: openclaw configure --section model                   │
+  │  - To disable: openclaw config set agents.defaults.memorySearch.enabled false  │
+  │                                                                                │
+  │  Verify: openclaw memory status --deep                                         │
+  │                                                                                │
+  ├────────────────────────────────────────────────────────────────────────────────╯
+  Updated config: ~/.openclaw/openclaw.json
+    Backup: ~/.openclaw/openclaw.json.bak
+  Backup: ~/.openclaw/openclaw.json.bak
+  │
+  └  Doctor complete.
+#+END_SRC
+
+在配置好了openclaw之后，尤其是成功配置运行时的LLM，在终端启动 ~openclaw~ 的TUI界面，就可以开始对话，设置你的身份和它的角色，然后开始布置任务了，比如连接telegram和微信，让它自己运行起来。以我的低配置VPS来看，在我只使用它来做对话的情况下，它消耗的资源看起来其实不多的，当然如果布置了复杂任务，我这个低配置VPS估计是够呛
+#+BEGIN_SRC bash
+  CPU[|                                                                                           0.7%]   Tasks: 37, 72 thr; 1 running
+  Mem[|||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||756M/969M]   Load average: 0.02 0.03 0.00
+  Swp[|||||||||||||||||||||||||||||||||||||||||||||||||||||||                               581M/1024M]   Uptime: 12:58:53
+
+    PID USER      PRI  NI  VIRT   RES   SHR S CPU% MEM%   TIME+  Command△ 下面就是openclaw的网关服务，是它的主要服务
+   6305 root       20   0 26.9G  303M 24924 S  0.0 31.3  0:00.38 /root/.nvm/versions/node/v24.16.0/bin/node /root/.nvm/versions/node/v24.16.0/lib/node_modules/openclaw/dist/index.js gateway --port 18789 
+   6306 root       20   0 26.9G  303M 24924 S  0.0 31.3  0:00.39 /root/.nvm/versions/node/v24.16.0/bin/node /root/.nvm/versions/node/v24.16.0/lib/node_modules/openclaw/dist/index.js gateway --port 18789
+   6318 root       20   0 26.9G  303M 24924 S  0.0 31.3  0:12.88 /root/.nvm/versions/node/v24.16.0/bin/node /root/.nvm/versions/node/v24.16.0/lib/node_modules/openclaw/dist/index.js gateway --port 18789
+#+END_SRC
+
+openclaw持续运行依赖于用户级的 ~openclaw-gateway~ 服务，只要这个服务在正常运行，你的openclaw就可以持续工作。
+#+BEGIN_SRC bash
+root@dedirock-58662919:~# systemctl --user status openclaw-gateway
+● openclaw-gateway.service - OpenClaw Gateway (v2026.6.11)
+     Loaded: loaded (/root/.config/systemd/user/openclaw-gateway.service; enabled; vendor preset: enabled)
+     Active: active (running) since Sun 2026-07-05 12:58:09 UTC; 1min 27s ago
+   Main PID: 782 (MainThread)
+      Tasks: 12 (limit: 1029)
+     Memory: 348.3M
+        CPU: 31.409s
+     CGroup: /user.slice/user-0.slice/user@0.service/app.slice/openclaw-gateway.service
+             └─782 /root/.nvm/versions/node/v24.16.0/bin/node /root/.nvm/versions/node/v24.16.0/lib/node_modules/openclaw/dist/index.js gateway --port 18789
+#+END_SRC
