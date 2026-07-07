@@ -548,7 +548,13 @@ go get xxx，然后自动给你计算所需依赖，写到go.mod
   ;; tab展开目录下的内容（hide/show），RET可以查看具体内容(visit)
   ;; C-p/n上下移动行，M-n/p上下移动section，如要要查看有哪些能用的候选命令
   ;; 在diff中s做add，u做撤销，大写的S和U则是对文件中所有的变更做s和u
+  ;; s: stage
+  ;; c: commit
+  ;; p: push
+  ;; 所以在magit中的操作，大概率就是magis-status调出buffer，光标移动到改动文件上，逐个文件按s加入暂存区
+  ;; 然后按cc写commit message，然后按p做push，选择你要push的分支就结束了
 #+end_src
+
 
 ** TODO Linux与Unix的关系解析
 :PROPERTIES:
