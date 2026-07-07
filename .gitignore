@@ -177,3 +177,7 @@ public/
 resources/
 .hugo_build.lock
 .#all-blogs.org
+.DS_Store
+assets/
+content/
+data/
