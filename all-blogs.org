@@ -539,7 +539,8 @@ go get xxx，然后自动给你计算所需依赖，写到go.mod
 
 - [[https://magit.vc/][magit官网]]
 - [[https://zlearning.netlify.app/linux/emacs/emacs-magit-workflow][emacs + magit工作流程]]
-参考上面两个文档基本就能学会magit的使用了。
+- [[https://devbins.github.io/post/magit/][Magit使用技巧]]
+参考上面文档基本就能学会magit的使用了。
 一个使用emacs的开发者，大概率会选用magit来做git相关的操作，magit的使用可谓是相当的简单和快捷，它其实就是一个以 `git status` 结果为起点的交互工具，然后把所有的git子命令和选项以很少量的按键给到用户，并且给出了选项的解释，使得你知道每个选项的含义。现在对于简单的`git status, add, commit, push`工作流，在5个文件内我大概可以在使用magit的情况下在10秒内搞定。
 #+begin_src elisp
   ;; magit-status命令 弹出展示类似于git satus的buffer
