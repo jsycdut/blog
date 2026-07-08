@@ -2451,3 +2451,17 @@ root@dedirock-58662919:~# systemctl --user status openclaw-gateway
      CGroup: /user.slice/user-0.slice/user@0.service/app.slice/openclaw-gateway.service
              └─782 /root/.nvm/versions/node/v24.16.0/bin/node /root/.nvm/versions/node/v24.16.0/lib/node_modules/openclaw/dist/index.js gateway --port 18789
 #+END_SRC
+
+** TODO pt站点
+:PROPERTIES:
+:EXPORT_FILE_NAME: pt站点
+:SLUG: 
+:RELEASE_DATE: 20260708
+:END:
+PT(Private Tracker)依赖于BT协议，属于我为人人，人人为我的私有圈子数据分享机制，私下分享的数据一般为影视作品，以后有机会搭建一下自家的服务器，配置磁盘阵列，加入PT站构建一下自家的影视仓库。
+
+- [[https://www.ptyqm.com/category/ptzddq/][PT邀请码]]
+- [[https://kydsj.vip/doku.php?id=wiki:pt%E7%AB%99][PT站]]
+- [[https://github.com/tomorrow505/auto_feed_js/wiki/%E6%94%AF%E6%8C%81%E7%9A%84%E7%AB%99%E7%82%B9][auto_feed_js]]
+- [[https://joinpeertube.org/][peertube]]
+- [[https://github.com/chinanf-boy/ipfs-zh][ipfs]]
