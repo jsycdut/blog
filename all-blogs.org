@@ -2551,6 +2551,7 @@ gap期间我获得了什么?
   - Java。准备了相关面试知识，JVM、并发、Netty、SpringBoot、Redis、分布式一致性、Kafka/RabbitMQ等，以及相关的算法题
   - 其他语言学习。Go/Python/TypeScript，基本都可以用来刷Leetcode的水平，或者做一点自己的小玩具
   - Emacs。重新配置了自己6年前的Emacs，将其打造为一个可以同时支持Java、Python、Go、TypeScript的IDE，目前在调试方面还有一点欠缺，遇到大的项目还是得使用JetBrains系列的IDE。
+  - 写了一个看比赛的小工具[[https://github.com/jsycdut/live-game-stream-thief][live-game-stream-thief]]。剥离出无广告的比赛播放链接，6月份看篮球NBA季后赛，7月份看足球世界杯，由于都是英文直播流，看比赛的时候还可以练一下英语听力。
 #+BEGIN_QUOTE
 心态是什么？
 #+END_QUOTE
