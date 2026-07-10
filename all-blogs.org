@@ -2556,3 +2556,138 @@ gap期间我获得了什么?
 心态是什么？
 #+END_QUOTE
 我不能浪费自己的时间，我也没有浪费自己的时间，我要做一些有意义的事情。
+** TODO Ruby入门
+:PROPERTIES:
+:EXPORT_FILE_NAME: ruby入门
+:SLUG: ruby
+:RELEASE_DATE: 20260702
+:END:
+- [[https://www.ruby-lang.org/zh_cn/downloads/releases/][ruby versions]]，目前3.x是主力稳定，4.x是未来版本
+- [[https://www.ruby-lang.org/zh_cn/documentation/][ruby中文文档]]
+
+ruby，一门动态、弱类型、解释型的脚本语言，一般用于Web开发（基于脚手架Rails）以及运维脚本开发。
+#+BEGIN_QUOTE
+静态/动态：指的是变量的类型是编译的时候就知道了，还是运行时才知道，编译时就知道的称为静态，运行时才知道的成为动态。动态类型的是可以在运行时更改变量指向的不同类型的目标的。
+
+强类型/弱类型：指的是编译系统是否会悄悄的给你玩变量类型转换，比如把int赋给bool，0会被作为false，其他作为true
+解释型的脚本类语言，一般都是动态的，我认为原因是解释型语言都不需要编译，所以不存在编译时知道类型，所以就是运行时知道类型的动态类型了。
+#+END_QUOTE
+
+ruby应该是大名鼎鼎的，因为在mac上的包管理器homebrew就是由ruby编写的。接下来，我将以我学习历史编程语言的固定视角，争取让自己入门Ruby。
+
+我的入门目标：
+1. 搭建Ruby开发环境（基于Emacs），后期可能会使用RubyMine(free for non-commercial use)。
+2. Ruby Hello World。
+3. Ruby 语法。包括变量声明、逻辑控制、数据结构、面向对象。
+4. Rails。编写一个简单的包含请求、处理、数据库的读写请求。
+
+#+BEGIN_QUOTE
+搭建ruby开发环境
+#+END_QUOTE
+
+#+BEGIN_SRC BASH
+➜  ~ brew install rbenv ruby-build
+➜  ~ rbenv init #把初始化脚本写入到.zshrc
+➜  ~ rbenv install 3.4.10 #安装稳定版本，3.4.10发布于20260630，是最新的版本
+➜  ~ rbenv global 3.4.10 #把3.4.10作为全局版本
+➜  ~ ruby -v #验证版本信息
+ruby 3.4.10 (2026-06-30 revision 2b0b7728dc) +PRISM [arm64-darwin23]
+➜  ~ gem --version # gem是ruby的package manager
+3.6.9
+#+END_SRC
+
+编写Hello World代码到hello.rb
+#+BEGIN_SRC ruby
+puts "Hello World!"
+#+END_SRC
+
+然后使用ruby运行rb文件
+#+BEGIN_SRC bash
+➜  ruby ruby hello.rb
+Hello World!
+#+END_SRC
+
+接下来在Emacs中配置ruby开发环境，我选择 `eglot + ruby-lsp`，eglot作为lsp客户端，ruby-lsp作为lsp服务端
+#+BEGIN_SRC bash
+➜  ruby gem install ruby-lsp #安装ruby-lsp
+Fetching ruby-lsp-0.26.10.gem
+Fetching language_server-protocol-3.17.0.6.gem
+Successfully installed language_server-protocol-3.17.0.6
+Successfully installed ruby-lsp-0.26.10
+2 gems installed
+
+A new release of RubyGems is available: 3.6.9 → 4.0.15!
+Run `gem update --system 4.0.15` to update your installation.
+#+END_SRC
+
+#+BEGIN_SRC lisp
+  ;; ruby-mode 可以识别ruby代码，做代码缩进，关键字识别等
+  (use-package ruby-mode
+  	:ensure nil
+  	:interpreter "ruby")
+
+  ;; 让Emacs能够识别并切换不同的ruby版本
+  (use-package rbenv
+  	:ensure t
+  	:config
+  	(global-rbenv-mode))
+
+  ;; 需要安装对应的treesit动态库 treesit-install-language-grammer
+  ;; treesitter作为语法解析工具，负责解析关键字、高亮代码
+  (setq treesit-language-source-alist
+        '((ruby . ("https://github.com/tree-sitter/tree-sitter-ruby.git" "master"))))
+
+  ;; ruby相关模式自动启动ruby-lsp作为lsp服务端，用作代码补全
+  (add-to-list 'eglot-server-programs '((ruby-ts-mode ruby-mode) "ruby-lsp"))
+
+  ;; ruby-lsp 0.26.x 在顶层代码中无法识别 puts/print/p 这类 Kernel 私有方法，这是 ruby-lsp 的已知缺陷。
+  ;; 需要在补全插件中使用dabbrev-code（本地补全）作为备选
+  (use-package company
+  :ensure t
+  :hook (prog-mode . company-mode)
+  :bind (:map company-active-map
+              ("C-n" . company-select-next)
+              ("C-p" . company-select-previous))
+  :config
+  (setq company-idle-delay 0
+        company-minimum-prefix-length 1)
+  ;; eglot managed buffer 中合并 LSP 补全与 dabbrev-code
+  ;; 解决 ruby-lsp 不返回 puts/print 等 Kernel 方法时的 fallback 问题
+  (add-hook 'eglot-managed-mode-hook
+            (lambda ()
+              (setq-local company-backends
+                          '((company-capf :with company-dabbrev-code))))))
+
+#+END_SRC
+
+
+创建ruby项目
+#+BEGIN_SRC bash
+➜  tmp mkdir ruby-demo
+➜  tmp cd ruby-demo
+➜  ruby-demo bundle init
+Writing new Gemfile to /Users/pg/tmp/ruby-demo/Gemfile
+➜  ruby-demo cat Gemfile
+# frozen_string_literal: true
+
+source "https://rubygems.org"
+
+# gem "rails"
+➜  ruby-demo echo 'puts "Hello World!"' > hello.rb
+➜  ruby-demo cat hello.rb
+puts "Hello World!"
+➜  ruby-demo git:(main) ✗ bundle install #安装依赖
+The Gemfile specifies no dependencies
+Resolving dependencies...
+Bundle complete! 0 Gemfile dependencies, 0 gems now installed.
+Use `bundle info [gemname]` to see where a bundled gem is installed
+#+END_SRC
+
+然后使用Emacs打开ruby-demo，写一段代码，试一下基本的代码自动补全是否OK
+[[https://jsycdut.top/oss/ruby-emacs.png]]
+
+
+okay, IDE基本搞定（快速启动应用和debug还没有配置），下一步学习语法~
+
+
+
